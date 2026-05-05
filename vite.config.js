@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// `base` matches the GitHub Pages path (repo name) only in production builds.
-// Dev still runs at `/` so http://localhost:5173 keeps working.
+// `base` defaults to `/` (works for Netlify, Vercel, root-domain hosting).
+// The GitHub Pages workflow overrides it via the VITE_BASE_PATH env var
+// to `/PropertyIntelligenceDashboard/` so assets resolve under the repo subpath.
 export default defineConfig(({ command }) => ({
   plugins: [react()],
-  base: command === 'build' ? '/PropertyIntelligenceDashboard/' : '/',
+  base: command === 'build' ? (process.env.VITE_BASE_PATH || '/') : '/',
 }))
