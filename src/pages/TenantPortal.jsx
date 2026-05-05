@@ -130,7 +130,6 @@ function SubmitPaymentModal({ lease, onClose, onSaved }) {
         property_id:    lease?.units?.property_id || null,
         lease_id:       lease?.id || null,
         tenant_id:      profile.id,
-        tenant_name:    profile.full_name || profile.email,
         amount:         Number(form.amount),
         due_date:       form.dueDate,
         paid_date:      form.paidDate || null,

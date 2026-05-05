@@ -370,7 +370,7 @@ export default function LoginPage() {
           {/* Tenant portal link */}
           <div style={{ marginTop: 20, padding: '14px 16px', background: '#F8FAFF', border: `1px solid ${C.border}`, borderRadius: 10, textAlign: 'center' }}>
             <div style={{ fontSize: 12, color: C.t3, marginBottom: 6 }}>Are you a <strong style={{ color: C.t2 }}>tenant</strong>?</div>
-            <a href="/tenant-login" style={{ fontSize: 13, fontWeight: 600, color: C.blue, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <a href="#/tenant-login" style={{ fontSize: 13, fontWeight: 600, color: C.blue, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="7"/><path d="M8 11v1M8 5v4"/><path d="M21 21l-4.35-4.35"/></svg>
               Access Tenant Portal
             </a>
