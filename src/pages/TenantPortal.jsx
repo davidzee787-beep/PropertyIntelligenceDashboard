@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { AugmenticsLogoMark } from '../components/Logo'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -308,7 +309,7 @@ function HomeTab({ lease, payments, maintenance, onPayNow, onReportIssue }) {
           {Icon.mapPin}
           Unit {lease.units?.unit_number} · {lease.units?.properties?.address || lease.units?.properties?.city || ''}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3,1fr)', gap: isMobile ? 10 : 16 }}>
           {[
             ['Monthly Rent',   fmtAED(lease.monthly_rent)],
             ['Lease Ends',     fmtDate(lease.end_date)],
@@ -323,7 +324,7 @@ function HomeTab({ lease, payments, maintenance, onPayNow, onReportIssue }) {
       </div>
 
       {/* Quick action cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
         {/* Next payment */}
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 14, padding: '20px 22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
@@ -397,13 +398,14 @@ function HomeTab({ lease, payments, maintenance, onPayNow, onReportIssue }) {
 
 // ─── Payments Tab ─────────────────────────────────────────────────────────────
 function PaymentsTab({ payments, lease, onPay }) {
+  const { isMobile } = useBreakpoint()
   const totalPaid    = payments.filter(p => p.status === 'paid').reduce((s, p) => s + Number(p.amount), 0)
   const totalPending = payments.filter(p => p.status === 'pending' || p.status === 'overdue').reduce((s, p) => s + Number(p.amount), 0)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: isMobile ? 10 : 16 }}>
         {[
           ['Total Payments', payments.length, C.t1, null],
           ['Total Paid',     fmtAED(totalPaid), C.greenDk, C.greenAlpha],
@@ -428,26 +430,41 @@ function PaymentsTab({ payments, lease, onPay }) {
         <div style={{ padding: '14px 20px', borderBottom: `1px solid ${C.border}`, fontSize: 12, fontWeight: 700, color: C.t2, textTransform: 'uppercase', letterSpacing: '0.7px' }}>Payment History</div>
         {payments.length === 0
           ? <div style={{ padding: '40px 20px', textAlign: 'center', color: C.t3, fontSize: 13 }}>No payments recorded yet.</div>
-          : <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <thead>
-                <tr style={{ background: '#F9FAFB' }}>
-                  {['Date', 'Amount', 'Method', 'Status', 'Notes'].map(h => (
-                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: C.t3, textTransform: 'uppercase', letterSpacing: '0.5px', borderBottom: `1px solid ${C.border}` }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {payments.map((p, i) => (
-                  <tr key={p.id} style={{ borderBottom: i < payments.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-                    <td style={{ padding: '13px 16px', color: C.t2 }}>{p.paid_date ? fmtDate(p.paid_date) : p.due_date ? fmtDate(p.due_date) : '—'}</td>
-                    <td style={{ padding: '13px 16px', fontWeight: 700, color: C.t1 }}>{fmtAED(p.amount)}</td>
-                    <td style={{ padding: '13px 16px', color: C.t3, textTransform: 'capitalize' }}>{(p.payment_method || '—').replace('_', ' ')}</td>
-                    <td style={{ padding: '13px 16px' }}><Badge s={p.status} /></td>
-                    <td style={{ padding: '13px 16px', color: C.t3, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.notes || '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          : isMobile
+            ? payments.map((p, i) => (
+                <div key={p.id} style={{ padding: '13px 16px', borderBottom: i < payments.length - 1 ? `1px solid ${C.border}` : 'none' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>{fmtAED(p.amount)}</span>
+                    <Badge s={p.status} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: 12, color: C.t3 }}>{p.paid_date ? fmtDate(p.paid_date) : p.due_date ? fmtDate(p.due_date) : '—'}</span>
+                    <span style={{ fontSize: 12, color: C.t3, textTransform: 'capitalize' }}>{(p.payment_method || '—').replace('_', ' ')}</span>
+                  </div>
+                </div>
+              ))
+            : <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ background: '#F9FAFB' }}>
+                      {['Date', 'Amount', 'Method', 'Status', 'Notes'].map(h => (
+                        <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: C.t3, textTransform: 'uppercase', letterSpacing: '0.5px', borderBottom: `1px solid ${C.border}` }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.map((p, i) => (
+                      <tr key={p.id} style={{ borderBottom: i < payments.length - 1 ? `1px solid ${C.border}` : 'none' }}>
+                        <td style={{ padding: '13px 16px', color: C.t2 }}>{p.paid_date ? fmtDate(p.paid_date) : p.due_date ? fmtDate(p.due_date) : '—'}</td>
+                        <td style={{ padding: '13px 16px', fontWeight: 700, color: C.t1 }}>{fmtAED(p.amount)}</td>
+                        <td style={{ padding: '13px 16px', color: C.t3, textTransform: 'capitalize' }}>{(p.payment_method || '—').replace('_', ' ')}</td>
+                        <td style={{ padding: '13px 16px' }}><Badge s={p.status} /></td>
+                        <td style={{ padding: '13px 16px', color: C.t3, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.notes || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
         }
       </div>
     </div>
@@ -509,6 +526,7 @@ function MaintenanceTab({ maintenance, lease, onReport }) {
 // ─── Main TenantPortal ────────────────────────────────────────────────────────
 export default function TenantPortal() {
   const { profile, signOut } = useAuth()
+  const { isMobile } = useBreakpoint()
 
   const [tab,         setTab]         = useState('Home')
   const [lease,       setLease]       = useState(null)
@@ -612,41 +630,44 @@ export default function TenantPortal() {
   return (
     <div style={{ minHeight: '100vh', background: C.bg, fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
-      <div style={{ background: C.white, borderBottom: `1px solid ${C.border}`, padding: '0 32px', height: 58, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
+      <div style={{ background: C.white, borderBottom: `1px solid ${C.border}`, padding: isMobile ? '0 16px' : '0 32px', height: 58, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <AugmenticsLogoMark size={32} onDark={false} />
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif", letterSpacing: '0.3px' }}>
-              LEADLINK <span style={{ color: C.blue }}>SOLUTIONS</span>
+          <AugmenticsLogoMark size={28} onDark={false} />
+          {!isMobile && (
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif", letterSpacing: '0.3px' }}>
+                LEADLINK <span style={{ color: C.blue }}>SOLUTIONS</span>
+              </div>
+              <div style={{ fontSize: 10, color: C.t3, letterSpacing: '1px', textTransform: 'uppercase' }}>Tenant Portal</div>
             </div>
-            <div style={{ fontSize: 10, color: C.t3, letterSpacing: '1px', textTransform: 'uppercase' }}>Tenant Portal</div>
-          </div>
+          )}
+          {isMobile && <div style={{ fontSize: 13, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif" }}>Tenant Portal</div>}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          {liveTag && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 14 }}>
+          {liveTag && !isMobile && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: C.greenDk, background: C.greenAlpha, padding: '4px 10px', borderRadius: 20, fontWeight: 600 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.green, display: 'inline-block' }} />
               Live update
             </div>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
-              {initials}
-            </div>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+            {initials}
+          </div>
+          {!isMobile && (
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: C.t1, lineHeight: 1.2 }}>{displayName}</div>
               <div style={{ fontSize: 11, color: C.t3 }}>Tenant</div>
             </div>
-          </div>
+          )}
           <button onClick={signOut} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, color: C.t2, background: 'none', border: `1px solid ${C.border}`, borderRadius: 7, padding: '6px 12px', cursor: 'pointer', fontFamily: 'inherit' }}>
-            {Icon.logout} Sign Out
+            {Icon.logout} {!isMobile && 'Sign Out'}
           </button>
         </div>
       </div>
 
       {/* Main */}
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '28px 24px' }}>
+      <div style={{ maxWidth: 860, margin: '0 auto', padding: isMobile ? '20px 14px' : '28px 24px' }}>
         {/* Welcome + tabs */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>

@@ -4,6 +4,7 @@ import { DataProvider, useAppData } from "../context/DataContext.jsx";
 import { useSettings, GCC } from "../context/SettingsContext.jsx";
 import { supabase } from "../lib/supabase.js";
 import { AugmenticsLogoMark } from "../components/Logo.jsx";
+import { useBreakpoint } from "../hooks/useBreakpoint.js";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const DARK = {
@@ -296,19 +297,27 @@ function TH({ children }) {
 // ─── Modal shell ──────────────────────────────────────────────────────────────
 function Modal({ title, onClose, children, wide }) {
   const C = useC();
+  const { isMobile } = useBreakpoint();
   return (
     <div style={{
       position: "fixed", inset: 0, background: "rgba(4,7,20,0.80)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 1000, padding: 24, backdropFilter: "blur(4px)",
+      display: "flex",
+      alignItems: isMobile ? "flex-end" : "center",
+      justifyContent: "center",
+      zIndex: 1000,
+      padding: isMobile ? 0 : 24,
+      backdropFilter: "blur(4px)",
     }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div style={{
-        background: C.white, borderRadius: 16, border: `1px solid ${C.border}`,
+        background: C.white,
+        borderRadius: isMobile ? "16px 16px 0 0" : 16,
+        border: `1px solid ${C.border}`,
         width: "100%", maxWidth: wide ? 660 : 520,
-        boxShadow: "0 32px 80px rgba(0,0,0,0.6)",
-        maxHeight: "92vh", overflowY: "auto",
+        boxShadow: isMobile ? "0 -8px 40px rgba(0,0,0,0.5)" : "0 32px 80px rgba(0,0,0,0.6)",
+        maxHeight: isMobile ? "90vh" : "92vh",
+        overflowY: "auto",
         animation: "fadeIn 0.15s ease",
       }}>
         <div style={{ padding: "18px 24px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: C.white, zIndex: 1 }}>
@@ -884,21 +893,24 @@ function Topbar({ tab, notifOpen, setNotifOpen, notifRef, openMaint, theme, togg
     ? [{ color: C.red,   text: `${openMaint} open maintenance request${openMaint === 1 ? "" : "s"} need attention`, time: "Now" }]
     : [{ color: C.green, text: "All maintenance requests resolved", time: "Now" }];
 
+  const { isMobile } = useBreakpoint();
   return (
-    <div style={{ background: C.white, borderBottom: `1px solid ${C.border}`, padding: "0 24px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, position: "relative" }}>
-      {/* Left: hamburger / page title */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{ color: C.t2, display: "flex" }}>{Icon.grid}</div>
-        <span style={{ fontSize: 13, fontWeight: 600, color: C.t2 }}>{tab}</span>
+    <div style={{ background: C.white, borderBottom: `1px solid ${C.border}`, padding: isMobile ? "0 14px" : "0 24px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, position: "relative" }}>
+      {/* Left: page title */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {!isMobile && <div style={{ color: C.t2, display: "flex" }}>{Icon.grid}</div>}
+        <span style={{ fontSize: isMobile ? 15 : 13, fontWeight: 700, color: C.t1, fontFamily: isMobile ? "'Syne', sans-serif" : "inherit" }}>{tab}</span>
       </div>
 
-      {/* Center: logo */}
-      <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 8 }}>
-        <AugmenticsLogoMark size={26} onDark />
-        <div style={{ fontSize: 13, fontWeight: 700, color: C.t1, letterSpacing: "0.3px", fontFamily: "'Syne', sans-serif" }}>
-          LEADLINK <span style={{ color: C.blue }}>SOLUTIONS</span>
+      {/* Center: logo (desktop only) */}
+      {!isMobile && (
+        <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 8 }}>
+          <AugmenticsLogoMark size={26} onDark />
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.t1, letterSpacing: "0.3px", fontFamily: "'Syne', sans-serif" }}>
+            LEADLINK <span style={{ color: C.blue }}>SOLUTIONS</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Right: controls */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -945,6 +957,7 @@ function Topbar({ tab, notifOpen, setNotifOpen, notifRef, openMaint, theme, togg
 // ════════════════════════════════════════════════════════════════════════════════
 function OverviewTab({ setTab, setSel, properties, payments, maintenance, revenueMonths }) {
   const C = useC();
+  const { isMobile } = useBreakpoint();
   const totalRent = properties.reduce((s, p) => s + p.rent, 0);
   const avgOcc    = properties.length ? Math.round(properties.reduce((s, p) => s + p.occ, 0) / properties.length) : 0;
   const openMaint = maintenance.filter(m => m.status !== "Resolved").length;
@@ -965,19 +978,21 @@ function OverviewTab({ setTab, setSel, properties, payments, maintenance, revenu
   return (
     <div className="fade-in">
       {/* Page header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 22 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: isMobile ? 14 : 22 }}>
         <div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif" }}>Dashboard</div>
-          <div style={{ fontSize: 12, color: C.t3, marginTop: 3 }}>Overview of your property portfolio.</div>
+          <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif" }}>Dashboard</div>
+          {!isMobile && <div style={{ fontSize: 12, color: C.t3, marginTop: 3 }}>Overview of your property portfolio.</div>}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.white, border: `1px solid ${C.border}`, borderRadius: 10, padding: "8px 14px" }}>
-          <span style={{ color: C.t3, display: "flex" }}>{Icon.calendar}</span>
-          <span style={{ fontSize: 12, fontWeight: 600, color: C.t2 }}>{dateStr}</span>
-        </div>
+        {!isMobile && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.white, border: `1px solid ${C.border}`, borderRadius: 10, padding: "8px 14px" }}>
+            <span style={{ color: C.t3, display: "flex" }}>{Icon.calendar}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: C.t2 }}>{dateStr}</span>
+          </div>
+        )}
       </div>
 
       {/* KPI row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 20 }}>
+      <div className="grid-kpi">
         <KPICard label="Total Revenue"    value={fmtAED(totalRent)} sub={`+${payments.filter(t => t.status === "Paid").length} payments this period`} icon={Icon.trending} accent={C.blue}  onClick={() => setTab("Payments")} sparkData={revenueMonths} />
         <KPICard label="Occupancy Rate"   value={`${avgOcc}%`}      sub={`+3.6% vs last month`}  accent={C.green} ring={avgOcc} />
         <KPICard label="Total Properties" value={properties.length}  sub={`${properties.reduce((s,p)=>s+p.units,0)} units managed`} icon={Icon.building} accent={C.blueLt} />
@@ -985,7 +1000,7 @@ function OverviewTab({ setTab, setSel, properties, payments, maintenance, revenu
       </div>
 
       {/* Revenue chart + Income type */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 14, marginBottom: 14 }}>
+      <div className="grid-rev">
         {/* Revenue line chart */}
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 14, padding: "18px 20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
@@ -1029,7 +1044,7 @@ function OverviewTab({ setTab, setSel, properties, payments, maintenance, revenu
       </div>
 
       {/* Bottom row: Rent Collections | Maintenance Alerts | Lease Expirations */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+      <div className="grid-3col">
         {/* Rent Collections */}
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 14, padding: "18px 20px" }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: C.t3, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 16 }}>Rent Collections</div>
@@ -1120,29 +1135,43 @@ function OverviewTab({ setTab, setSel, properties, payments, maintenance, revenu
         } />
         {properties.length === 0
           ? <div style={{ padding: "32px 20px", textAlign: "center", color: C.t3, fontSize: 13 }}>No properties yet. <button onClick={() => setTab("Properties")} style={{ color: C.blue, background: "none", border: "none", cursor: "pointer", fontWeight: 600, fontFamily: "inherit", fontSize: 13 }}>Add your first property →</button></div>
-          : <>
-              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.4fr 1fr 90px", padding: "10px 20px", borderBottom: `1px solid ${C.border}`, background: C.bg }}>
-                {["Property", "Type", "Rent / mo", "Occupancy", "Lease Expiry", "Status"].map(h => <TH key={h}>{h}</TH>)}
-              </div>
-              {properties.map((p, i) => (
-                <div key={p.id}
-                  style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.4fr 1fr 90px", padding: "14px 20px", alignItems: "center", borderBottom: i < properties.length - 1 ? `1px solid ${C.border}` : "none", cursor: "pointer", transition: "background 0.12s" }}
-                  onMouseEnter={e => e.currentTarget.style.background = C.blueAlpha}
-                  onMouseLeave={e => e.currentTarget.style.background = "none"}
-                  onClick={() => { setSel(p); setTab("Properties"); }}
-                >
-                  <div>
+          : isMobile
+            ? properties.map((p, i) => (
+                <div key={p.id} style={{ padding: "13px 16px", borderBottom: i < properties.length - 1 ? `1px solid ${C.border}` : "none", cursor: "pointer" }}
+                  onClick={() => { setSel(p); setTab("Properties"); }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: C.t1 }}>{p.name}</div>
-                    <div style={{ fontSize: 11, color: C.t3, marginTop: 2, display: "flex", alignItems: "center", gap: 3 }}>{Icon.mapPin} {p.city}</div>
+                    <Badge s={p.status} />
                   </div>
-                  <span style={{ fontSize: 12, color: C.t2 }}>{p.type}</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: C.t1 }}>{fmtAED(p.rent)}</span>
-                  <OccBar pct={p.occ} />
-                  <span style={{ fontSize: 12, color: p.daysLeft < 120 ? C.red : C.t2, fontWeight: p.daysLeft < 120 ? 600 : 400 }}>{p.expiry}</span>
-                  <Badge s={p.status} />
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 11, color: C.t3 }}>{p.city} · {p.type}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: C.t1 }}>{fmtAED(p.rent)}/mo</span>
+                  </div>
                 </div>
-              ))}
-            </>
+              ))
+            : <>
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.4fr 1fr 90px", padding: "10px 20px", borderBottom: `1px solid ${C.border}`, background: C.bg }}>
+                  {["Property", "Type", "Rent / mo", "Occupancy", "Lease Expiry", "Status"].map(h => <TH key={h}>{h}</TH>)}
+                </div>
+                {properties.map((p, i) => (
+                  <div key={p.id}
+                    style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.4fr 1fr 90px", padding: "14px 20px", alignItems: "center", borderBottom: i < properties.length - 1 ? `1px solid ${C.border}` : "none", cursor: "pointer", transition: "background 0.12s" }}
+                    onMouseEnter={e => e.currentTarget.style.background = C.blueAlpha}
+                    onMouseLeave={e => e.currentTarget.style.background = "none"}
+                    onClick={() => { setSel(p); setTab("Properties"); }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: C.t1 }}>{p.name}</div>
+                      <div style={{ fontSize: 11, color: C.t3, marginTop: 2, display: "flex", alignItems: "center", gap: 3 }}>{Icon.mapPin} {p.city}</div>
+                    </div>
+                    <span style={{ fontSize: 12, color: C.t2 }}>{p.type}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: C.t1 }}>{fmtAED(p.rent)}</span>
+                    <OccBar pct={p.occ} />
+                    <span style={{ fontSize: 12, color: p.daysLeft < 120 ? C.red : C.t2, fontWeight: p.daysLeft < 120 ? 600 : 400 }}>{p.expiry}</span>
+                    <Badge s={p.status} />
+                  </div>
+                ))}
+              </>
         }
       </div>
 
@@ -1365,6 +1394,7 @@ function PropertiesTab({ sel, setSel, properties, maintenance, onAddProperty, on
 // ════════════════════════════════════════════════════════════════════════════════
 function PaymentsTab({ payments, properties, onAddPayment }) {
   const C = useC();
+  const { isMobile } = useBreakpoint();
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const statuses = ["All", "Paid", "Pending", "Overdue"];
@@ -1381,7 +1411,7 @@ function PaymentsTab({ payments, properties, onAddPayment }) {
 
   return (
     <div className="fade-in">
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
+      <div className="grid-pay">
         <KPICard label="Collected" value={fmtAED(collected)} sub={`${payments.filter(t => t.status === "Paid").length} payments`}    icon={Icon.check}   accent={C.green} />
         <KPICard label="Pending"   value={fmtAED(pending)}   sub={`${payments.filter(t => t.status === "Pending").length} payment${payments.filter(t => t.status === "Pending").length !== 1 ? "s" : ""}`} icon={Icon.calendar} accent={C.amber} />
         <KPICard label="Overdue"   value={fmtAED(overdue)}   sub="Action required"                                                    icon={Icon.alert}    accent={C.red}   />
@@ -1408,15 +1438,29 @@ function PaymentsTab({ payments, properties, onAddPayment }) {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "100px 1.4fr 1.4fr 1fr 1fr 100px 90px", padding: "10px 20px", borderBottom: `1px solid ${C.border}`, background: C.bg }}>
-          {["Ref", "Tenant", "Property", "Date", "Amount", "Method", "Status"].map(h => <TH key={h}>{h}</TH>)}
-        </div>
+        {!isMobile && (
+          <div style={{ display: "grid", gridTemplateColumns: "100px 1.4fr 1.4fr 1fr 1fr 100px 90px", padding: "10px 20px", borderBottom: `1px solid ${C.border}`, background: C.bg }}>
+            {["Ref", "Tenant", "Property", "Date", "Amount", "Method", "Status"].map(h => <TH key={h}>{h}</TH>)}
+          </div>
+        )}
 
         {filtered.length === 0
           ? <div style={{ padding: "40px 20px", textAlign: "center", color: C.t3, fontSize: 13 }}>
               {payments.length === 0 ? "No payment records yet. Click \"Record Payment\" to add one." : "No transactions match your filter."}
             </div>
-          : filtered.map((t, i) => (
+          : filtered.map((t, i) => isMobile ? (
+              <div key={t.id} style={{ padding: "14px 16px", borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : "none" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: C.t1 }}>{t.tenant}</div>
+                  <Badge s={t.status} />
+                </div>
+                <div style={{ fontSize: 12, color: C.t2, marginBottom: 6 }}>{t.prop}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 11, color: C.t3 }}>{t.date} · {t.method}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>{fmtAED(t.amount)}</span>
+                </div>
+              </div>
+            ) : (
               <div key={t.id}
                 style={{ display: "grid", gridTemplateColumns: "100px 1.4fr 1.4fr 1fr 1fr 100px 90px", padding: "13px 20px", alignItems: "center", borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : "none", transition: "background 0.12s", cursor: "pointer" }}
                 onMouseEnter={e => e.currentTarget.style.background = C.bg}
@@ -1442,6 +1486,7 @@ function PaymentsTab({ payments, properties, onAddPayment }) {
 // ════════════════════════════════════════════════════════════════════════════════
 function MaintenanceTab({ maintenance }) {
   const C = useC();
+  const { isMobile } = useBreakpoint();
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const filters = ["All", "High", "Medium", "Low"];
@@ -1456,7 +1501,7 @@ function MaintenanceTab({ maintenance }) {
 
   return (
     <div className="fade-in">
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
+      <div className="grid-maint">
         <KPICard label="Open Requests" value={openMaint} sub="Needs attention" icon={Icon.wrench} accent={C.red} />
         <KPICard label="High Priority" value={maintenance.filter(m => m.priority === "High" && m.status !== "Resolved").length} sub="Escalate immediately" icon={Icon.alert} accent={C.red} />
         <KPICard label="Resolved"      value={maintenance.filter(m => m.status === "Resolved").length} sub="Total resolved" icon={Icon.check} accent={C.green} />
@@ -1477,15 +1522,29 @@ function MaintenanceTab({ maintenance }) {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "90px 2fr 1.4fr 1fr 1fr 80px 100px", padding: "10px 20px", borderBottom: `1px solid ${C.border}`, background: C.bg }}>
-          {["Ref", "Issue", "Property", "Assignee", "Date", "Priority", "Status"].map(h => <TH key={h}>{h}</TH>)}
-        </div>
+        {!isMobile && (
+          <div style={{ display: "grid", gridTemplateColumns: "90px 2fr 1.4fr 1fr 1fr 80px 100px", padding: "10px 20px", borderBottom: `1px solid ${C.border}`, background: C.bg }}>
+            {["Ref", "Issue", "Property", "Assignee", "Date", "Priority", "Status"].map(h => <TH key={h}>{h}</TH>)}
+          </div>
+        )}
 
         {filtered.length === 0
           ? <div style={{ padding: "40px 20px", textAlign: "center", color: C.t3, fontSize: 13 }}>
               {maintenance.length === 0 ? "No maintenance requests. Tenants can submit requests via the Tenant Portal." : "No requests match your filter."}
             </div>
-          : filtered.map((m, i) => (
+          : filtered.map((m, i) => isMobile ? (
+              <div key={m.id} style={{ padding: "14px 16px", borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : "none", borderLeft: `3px solid ${priorityAccent[m.priority] || C.border}` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 5 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: m.status === "Resolved" ? C.t3 : C.t1, flex: 1, marginRight: 8 }}>{m.issue}</div>
+                  <Badge s={m.status} />
+                </div>
+                <div style={{ fontSize: 12, color: C.t2, marginBottom: 6 }}>{m.prop}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 11, color: m.assignee === "Unassigned" ? C.red : C.t3, fontWeight: m.assignee === "Unassigned" ? 600 : 400 }}>{m.assignee} · {m.date}</span>
+                  <Badge s={m.priority} />
+                </div>
+              </div>
+            ) : (
               <div key={m.id}
                 style={{ display: "grid", gridTemplateColumns: "90px 2fr 1.4fr 1fr 1fr 80px 100px", padding: "13px 20px", alignItems: "center", borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : "none", borderLeft: `3px solid ${priorityAccent[m.priority] || C.border}`, transition: "background 0.12s", cursor: "pointer" }}
                 onMouseEnter={e => e.currentTarget.style.background = C.bg}
@@ -2118,6 +2177,50 @@ function AISidePanel({ properties, payments, maintenance, displayName }) {
   );
 }
 
+// ─── Bottom nav (mobile only) ─────────────────────────────────────────────────
+function BottomNav({ tab, setTab, setSel, openMaint }) {
+  const C = useC();
+  const mobileNav = [
+    { id: "Overview",     label: "Home",     icon: Icon.home      },
+    { id: "Properties",   label: "Props",    icon: Icon.building  },
+    { id: "Tenants",      label: "Tenants",  icon: Icon.tenants   },
+    { id: "Payments",     label: "Payments", icon: Icon.dollar    },
+    { id: "Maintenance",  label: "Issues",   icon: Icon.wrench    },
+  ];
+  return (
+    <div style={{
+      position: "fixed", bottom: 0, left: 0, right: 0,
+      height: 60, background: C.sidebar, borderTop: `1px solid ${C.border}`,
+      display: "flex", alignItems: "center", zIndex: 200,
+      paddingBottom: "env(safe-area-inset-bottom)",
+    }}>
+      {mobileNav.map(n => {
+        const active = tab === n.id;
+        return (
+          <button key={n.id} onClick={() => { setTab(n.id); setSel(null); }}
+            style={{
+              flex: 1, height: "100%", display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", gap: 3,
+              background: "none", border: "none", cursor: "pointer",
+              color: active ? "#fff" : C.sideT2,
+              position: "relative",
+            }}
+          >
+            {active && (
+              <span style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 32, height: 2, borderRadius: 2, background: C.blue }} />
+            )}
+            <span style={{ display: "flex" }}>{n.icon}</span>
+            <span style={{ fontSize: 10, fontWeight: active ? 700 : 500 }}>{n.label}</span>
+            {n.id === "Maintenance" && openMaint > 0 && (
+              <span style={{ position: "absolute", top: 8, right: "calc(50% - 14px)", width: 7, height: 7, borderRadius: "50%", background: C.red, border: `1.5px solid ${C.sidebar}` }} />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function DashboardContent({ theme, toggleTheme }) {
   const C = useC();
   const { properties, payments, maintenance, tenants, revenueMonths, loading } = useAppData();
@@ -2148,11 +2251,13 @@ function DashboardContent({ theme, toggleTheme }) {
   const initials    = displayName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const openMaint   = maintenance.filter(m => m.status !== "Resolved").length;
 
+  const { isMobile } = useBreakpoint();
+
   if (loading) {
     return (
       <div style={{ display: "flex", height: "100vh", background: C.bg }}>
-        <Sidebar tab={tab} setTab={setTab} setSel={setSel} profileOpen={false} setProfileOpen={() => {}} profileRef={profileRef}
-          displayName={displayName} initials={initials} signOut={signOut} openMaint={0} />
+        {!isMobile && <Sidebar tab={tab} setTab={setTab} setSel={setSel} profileOpen={false} setProfileOpen={() => {}} profileRef={profileRef}
+          displayName={displayName} initials={initials} signOut={signOut} openMaint={0} />}
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
           <div style={{ width: 32, height: 32, border: `3px solid ${C.blue}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
           <div style={{ fontSize: 13, color: C.t3 }}>Loading portfolio data…</div>
@@ -2165,16 +2270,18 @@ function DashboardContent({ theme, toggleTheme }) {
 
   return (
     <div style={{ display: "flex", height: "100vh", background: C.bg, overflow: "hidden" }}>
-      <Sidebar
-        tab={tab} setTab={setTab} setSel={setSel}
-        profileOpen={profileOpen} setProfileOpen={setProfileOpen} profileRef={profileRef}
-        displayName={displayName} initials={initials} signOut={signOut} openMaint={openMaint}
-      />
+      {!isMobile && (
+        <Sidebar
+          tab={tab} setTab={setTab} setSel={setSel}
+          profileOpen={profileOpen} setProfileOpen={setProfileOpen} profileRef={profileRef}
+          displayName={displayName} initials={initials} signOut={signOut} openMaint={openMaint}
+        />
+      )}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
         <Topbar tab={tab} notifOpen={notifOpen} setNotifOpen={setNotifOpen} notifRef={notifRef} openMaint={openMaint} theme={theme} toggleTheme={toggleTheme} />
         <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
           {/* Main scrollable content */}
-          <div style={{ flex: 1, overflow: "auto", padding: "20px 24px" }}>
+          <div style={{ flex: 1, overflow: "auto", padding: isMobile ? "16px 14px 80px" : "20px 24px" }}>
             {tab === "Overview"    && <OverviewTab    setTab={setTab} setSel={setSel} properties={properties} payments={payments} maintenance={maintenance} revenueMonths={revenueMonths} />}
             {tab === "Properties"  && <PropertiesTab  sel={sel} setSel={setSel} properties={properties} maintenance={maintenance} onAddProperty={() => setShowAddProp(true)} onAddUnit={prop => setAddUnitProp(prop)} onAddLease={prop => setAddLeaseProp(prop)} />}
             {tab === "Tenants"     && <TenantsTab     tenants={tenants} properties={properties} onAddTenant={prop => setAddLeaseProp(prop)} />}
@@ -2183,11 +2290,16 @@ function DashboardContent({ theme, toggleTheme }) {
             {tab === "Assistant"   && <AssistantTab   properties={properties} payments={payments} maintenance={maintenance} displayName={displayName} />}
             {tab === "Settings"    && <SettingsTab />}
           </div>
-          {/* Right panels — visible on Overview only */}
-          {isOverview && <RightInfoPanel properties={properties} tenants={tenants} setTab={setTab} setSel={setSel} />}
-          {isOverview && <AISidePanel    properties={properties} payments={payments} maintenance={maintenance} displayName={displayName} />}
+          {/* Right panels — visible on Overview, desktop only */}
+          {isOverview && !isMobile && <RightInfoPanel properties={properties} tenants={tenants} setTab={setTab} setSel={setSel} />}
+          {isOverview && !isMobile && <AISidePanel    properties={properties} payments={payments} maintenance={maintenance} displayName={displayName} />}
         </div>
       </div>
+
+      {/* Bottom navigation — mobile only */}
+      {isMobile && (
+        <BottomNav tab={tab} setTab={setTab} setSel={setSel} openMaint={openMaint} />
+      )}
 
       {showAddProp  && <AddPropertyModal onClose={() => setShowAddProp(false)} onSaved={() => setTab("Properties")} />}
       {addUnitProp  && <AddUnitModal     property={addUnitProp} onClose={() => setAddUnitProp(null)} />}

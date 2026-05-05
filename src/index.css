@@ -60,3 +60,19 @@ input  { font-family: inherit; }
 .aug-theme-trans * {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
+
+/* ─── Responsive grid utilities ─────────────────────────────────────────────── */
+.grid-kpi  { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.grid-rev  { display: grid; grid-template-columns: 1fr 280px;      gap: 14px; margin-bottom: 14px; }
+.grid-pay  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.grid-maint{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.scroll-x  { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 767px) {
+  .grid-kpi   { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+  .grid-3col  { grid-template-columns: 1fr; gap: 10px; }
+  .grid-rev   { grid-template-columns: 1fr; gap: 10px; margin-bottom: 10px; }
+  .grid-pay   { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .grid-maint { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+}

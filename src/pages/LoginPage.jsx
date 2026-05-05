@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { AugmenticsLogoMark } from '../components/Logo'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 
 const C = {
   bg:      '#F0F2F8',
@@ -63,6 +64,7 @@ const features = [
 
 export default function LoginPage() {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth()
+  const { isMobile } = useBreakpoint()
 
   const [mode, setMode]         = useState('signin') // 'signin' | 'signup' | 'forgot'
   const [email, setEmail]       = useState('')
@@ -134,10 +136,10 @@ export default function LoginPage() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
 
-      {/* ── LEFT PANEL ── */}
+      {/* ── LEFT PANEL — hidden on mobile ── */}
       <div style={{
         width: '55%', background: C.navy,
-        display: 'flex', flexDirection: 'column',
+        display: isMobile ? 'none' : 'flex', flexDirection: 'column',
         padding: '48px 56px', position: 'relative', overflow: 'hidden',
       }}>
         {/* Background decoration */}
@@ -202,11 +204,26 @@ export default function LoginPage() {
 
       {/* ── RIGHT PANEL ── */}
       <div style={{
-        width: '45%', background: C.white,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '48px 56px',
+        width: isMobile ? '100%' : '45%',
+        background: C.white,
+        display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'center',
+        padding: isMobile ? '40px 24px' : '48px 56px',
+        minHeight: '100vh',
       }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
+
+          {/* Logo — mobile only (left panel is hidden) */}
+          {isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+              <AugmenticsLogoMark size={36} onDark={false} />
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.t1, letterSpacing: '0.3px', fontFamily: 'Syne, sans-serif' }}>
+                  LEADLINK <span style={{ color: C.blue }}>SOLUTIONS</span>
+                </div>
+                <div style={{ fontSize: 10, color: C.t3, letterSpacing: '1px', textTransform: 'uppercase' }}>Property Management</div>
+              </div>
+            </div>
+          )}
 
           {/* Heading */}
           <div style={{ marginBottom: 32 }}>
