@@ -284,6 +284,7 @@ function TabBar({ tab, setTab }) {
 
 // ─── Home Tab ─────────────────────────────────────────────────────────────────
 function HomeTab({ lease, payments, maintenance, onPayNow, onReportIssue }) {
+  const { isMobile } = useBreakpoint()
   if (!lease) return (
     <div style={{ textAlign: 'center', padding: '60px 0' }}>
       <div style={{ fontSize: 48, marginBottom: 16 }}>🏠</div>

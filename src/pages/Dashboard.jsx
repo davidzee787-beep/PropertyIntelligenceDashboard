@@ -259,7 +259,7 @@ function KPICard({ label, value, sub, icon, accent, onClick, sparkData, ring }) 
         {ring != null
           ? <div style={{ position: "relative", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <RingProgress pct={ring} size={44} color={accent} thickness={5} />
-              <span style={{ position: "absolute", fontSize: 9, fontWeight: 700, color: accent }}>{ring}%</span>
+              <span style={{ position: "absolute", fontSize: 11, fontWeight: 800, color: accent }}>{ring}%</span>
             </div>
           : <div style={{ width: 34, height: 34, borderRadius: 9, background: `${accent}18`, display: "flex", alignItems: "center", justifyContent: "center", color: accent }}>{icon}</div>
         }
@@ -887,7 +887,7 @@ function Sidebar({ tab, setTab, setSel, profileOpen, setProfileOpen, profileRef,
 }
 
 // ─── Top bar ──────────────────────────────────────────────────────────────────
-function Topbar({ tab, notifOpen, setNotifOpen, notifRef, openMaint, theme, toggleTheme }) {
+function Topbar({ tab, notifOpen, setNotifOpen, notifRef, openMaint, theme, toggleTheme, displayName, initials, signOut, profileOpen, setProfileOpen, profileRef }) {
   const C = useC();
   const alerts = openMaint > 0
     ? [{ color: C.red,   text: `${openMaint} open maintenance request${openMaint === 1 ? "" : "s"} need attention`, time: "Now" }]
@@ -947,6 +947,33 @@ function Topbar({ tab, notifOpen, setNotifOpen, notifRef, openMaint, theme, togg
         >
           {theme === 'dark' ? Icon.sun : Icon.moon}
         </button>
+        {/* Profile avatar — mobile only (sidebar is hidden) */}
+        {isMobile && (
+          <div ref={profileRef} style={{ position: "relative" }}>
+            <div onClick={() => setProfileOpen(p => !p)}
+              style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#1B5FD8,#3B7EF6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff", cursor: "pointer", letterSpacing: "0.5px", userSelect: "none" }}>
+              {initials || "U"}
+            </div>
+            {profileOpen && (
+              <div className="fade-in" style={{ position: "fixed", top: 56, right: 12, width: 210, background: C.white, border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,0.45)", zIndex: 9999 }}>
+                <div style={{ padding: "12px 14px", borderBottom: `1px solid ${C.border}` }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: C.t1 }}>{displayName}</div>
+                  <div style={{ fontSize: 11, color: C.t3, marginTop: 2 }}>Property Manager</div>
+                </div>
+                <button onClick={() => { setProfileOpen(false); }}
+                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", width: "100%", background: "none", border: "none", cursor: "pointer", color: C.t2, fontSize: 12, textAlign: "left", fontFamily: "inherit", borderBottom: `1px solid ${C.border}` }}
+                  onMouseEnter={e => { e.currentTarget.style.background = C.blueAlpha; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "none"; }}
+                >{Icon.settings} Settings</button>
+                <button onClick={signOut}
+                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", width: "100%", background: "none", border: "none", cursor: "pointer", color: C.red, fontSize: 12, textAlign: "left", fontFamily: "inherit" }}
+                  onMouseEnter={e => e.currentTarget.style.background = C.redAlpha}
+                  onMouseLeave={e => e.currentTarget.style.background = "none"}
+                >{Icon.logout} Sign Out</button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -966,11 +993,14 @@ function OverviewTab({ setTab, setSel, properties, payments, maintenance, revenu
   const pending   = payments.filter(t => t.status === "Pending").reduce((s, t) => s + t.amount, 0);
   const overdue   = payments.filter(t => t.status === "Overdue").reduce((s, t) => s + t.amount, 0);
 
-  const resTypes = [
-    { label: "Residential", pct: 65, color: C.blue },
-    { label: "Commercial",  pct: 25, color: C.blueLt },
-    { label: "Industrial",  pct: 10, color: "#0EA5E9" },
-  ];
+  const typeColorMap = { Residential: C.blue, Commercial: C.blueLt, Industrial: "#0EA5E9", Villa: "#8B5CF6", Mixed: C.green };
+  const typeCounts = properties.reduce((acc, p) => { const t = p.type || "Other"; acc[t] = (acc[t] || 0) + 1; return acc; }, {});
+  const total = properties.length || 1;
+  const resTypes = Object.entries(typeCounts).map(([label, count], i) => ({
+    label,
+    pct: Math.round(count / total * 100),
+    color: typeColorMap[label] || ["#0EA5E9","#8B5CF6","#F59E0B","#10B981"][i % 4],
+  }));
 
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -1025,21 +1055,27 @@ function OverviewTab({ setTab, setSel, properties, payments, maintenance, revenu
           </div>
         </div>
 
-        {/* Income by property type */}
+        {/* Portfolio by property type */}
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 14, padding: "18px 20px" }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: C.t3, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 16 }}>Income by Property Type</div>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-            <DonutChart segments={resTypes} size={110} thickness={20} />
-          </div>
-          {resTypes.map(s => (
-            <div key={s.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                <div style={{ width: 9, height: 9, borderRadius: "50%", background: s.color, flexShrink: 0 }} />
-                <span style={{ fontSize: 12, color: C.t2 }}>{s.label}</span>
+          <div style={{ fontSize: 11, fontWeight: 600, color: C.t3, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 16 }}>Portfolio by Property Type</div>
+          {properties.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "24px 0", color: C.t3, fontSize: 12 }}>No properties yet</div>
+          ) : (
+            <>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                <DonutChart segments={resTypes} size={110} thickness={20} />
               </div>
-              <span style={{ fontSize: 12, fontWeight: 700, color: C.t1 }}>{s.pct}%</span>
-            </div>
-          ))}
+              {resTypes.map(s => (
+                <div key={s.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                    <div style={{ width: 9, height: 9, borderRadius: "50%", background: s.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: C.t2 }}>{s.label}</span>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: C.t1 }}>{s.pct}%</span>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
@@ -2184,7 +2220,7 @@ function BottomNav({ tab, setTab, setSel, openMaint }) {
     { id: "Overview",     label: "Home",     icon: Icon.home      },
     { id: "Properties",   label: "Props",    icon: Icon.building  },
     { id: "Tenants",      label: "Tenants",  icon: Icon.tenants   },
-    { id: "Payments",     label: "Payments", icon: Icon.dollar    },
+    { id: "Payments",     label: "Payments", icon: Icon.payment   },
     { id: "Maintenance",  label: "Issues",   icon: Icon.wrench    },
   ];
   return (
@@ -2278,7 +2314,7 @@ function DashboardContent({ theme, toggleTheme }) {
         />
       )}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
-        <Topbar tab={tab} notifOpen={notifOpen} setNotifOpen={setNotifOpen} notifRef={notifRef} openMaint={openMaint} theme={theme} toggleTheme={toggleTheme} />
+        <Topbar tab={tab} notifOpen={notifOpen} setNotifOpen={setNotifOpen} notifRef={notifRef} openMaint={openMaint} theme={theme} toggleTheme={toggleTheme} displayName={displayName} initials={initials} signOut={signOut} profileOpen={profileOpen} setProfileOpen={setProfileOpen} profileRef={profileRef} />
         <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
           {/* Main scrollable content */}
           <div style={{ flex: 1, overflow: "auto", padding: isMobile ? "16px 14px 80px" : "20px 24px" }}>
