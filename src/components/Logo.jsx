@@ -2,7 +2,9 @@
 // Drop your actual logo file at: public/leadlink-logo.png (or .svg)
 // It will be served at /leadlink-logo.png and rendered pixel-perfect at any size.
 
-const LOGO_SRC = '/leadlink-logo.png'
+// Prefix with BASE_URL so the path works in dev (`/`) and on GitHub Pages
+// (`/PropertyIntelligenceDashboard/`).
+const LOGO_SRC = `${import.meta.env.BASE_URL}leadlink-logo.png`
 
 export function LeadlinkLogoMark({ size = 40, onDark = true }) {
   return (
