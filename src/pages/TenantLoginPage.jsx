@@ -51,10 +51,10 @@ export default function TenantLoginPage() {
         {/* Logo */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 40 }}>
           <AugmenticsLogoMark size={52} onDark={true} />
-          <div style={{ marginTop: 14, fontSize: 15, fontWeight: 700, color: '#F1F5F9', letterSpacing: '0.4px', fontFamily: "'Syne', sans-serif" }}>
-            LEADLINK <span style={{ color: C.blueLt }}>SOLUTIONS</span>
+          <div style={{ marginTop: 16, fontSize: 16, fontWeight: 800, color: '#F1F5F9', letterSpacing: '1.4px', fontFamily: "'Syne', sans-serif", lineHeight: 1 }}>
+            AUGMENTICS <span style={{ color: C.blueLt }}>AI</span>
           </div>
-          <div style={{ fontSize: 10, color: '#475569', letterSpacing: '1.4px', textTransform: 'uppercase', marginTop: 3 }}>
+          <div style={{ fontSize: 10, color: '#475569', letterSpacing: '1.6px', textTransform: 'uppercase', marginTop: 5, fontWeight: 500 }}>
             Tenant Portal
           </div>
         </div>

@@ -14,7 +14,7 @@ function LoadingScreen() {
       background: '#09112A', fontFamily: 'Inter, sans-serif', flexDirection: 'column', gap: 16,
     }}>
       <AugmenticsLogoMark size={52} onDark={true} />
-      <div style={{ fontSize: 13, color: '#64748B', letterSpacing: '0.5px' }}>Loading Leadlink Solutions…</div>
+      <div style={{ fontSize: 13, color: '#64748B', letterSpacing: '0.5px' }}>Loading Augmentics AI…</div>
     </div>
   )
 }

@@ -1,42 +1,81 @@
-// Leadlink Solutions logo
-// Drop your actual logo file at: public/leadlink-logo.png (or .svg)
-// It will be served at /leadlink-logo.png and rendered pixel-perfect at any size.
+// Augmentics AI — Real Estate Intelligence logo
+//
+// The logo is rendered as inline SVG so it adapts to both dark and light
+// themes automatically (via the `onDark` prop) without needing two separate
+// image files. If you'd rather use your own PNG, drop it at
+// `public/augmentics-logo.png` and swap the <svg> below for an <img> tag.
 
-// Prefix with BASE_URL so the path works in dev (`/`) and on GitHub Pages
-// (`/PropertyIntelligenceDashboard/`).
-const LOGO_SRC = `${import.meta.env.BASE_URL}leadlink-logo.png`
+const ACCENT = '#2B96D4'
 
-export function LeadlinkLogoMark({ size = 40, onDark = true }) {
+export function AugmenticsLogoMark({ size = 40, onDark = true }) {
+  const stroke = onDark ? '#F1F5F9' : '#0D1117'
   return (
-    <img
-      src={LOGO_SRC}
-      alt="Leadlink Solutions"
+    <svg
       width={size}
       height={size}
-      style={{ width: size, height: size, objectFit: 'contain', display: 'block' }}
-      draggable={false}
-    />
+      viewBox="0 0 100 100"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: 'block' }}
+      aria-label="Augmentics AI"
+    >
+      {/* Outer triangle outline */}
+      <path
+        d="M 50 8 L 92 90 L 8 90 Z"
+        fill="none"
+        stroke={stroke}
+        strokeWidth="4.5"
+        strokeLinejoin="miter"
+      />
+      {/* Inner triangle outline */}
+      <path
+        d="M 50 28 L 78 82 L 22 82 Z"
+        fill="none"
+        stroke={stroke}
+        strokeWidth="3"
+        strokeLinejoin="miter"
+      />
+      {/* Innermost solid blue triangle */}
+      <path
+        d="M 50 44 L 70 76 L 30 76 Z"
+        fill={ACCENT}
+      />
+    </svg>
   )
 }
 
-export function LeadlinkLogoBrand({ size = 40, onDark = true }) {
+export function AugmenticsLogoBrand({ size = 40, onDark = true }) {
   const textColor = onDark ? '#F1F5F9' : '#0D1117'
   const subColor  = onDark ? '#64748B' : '#6B7280'
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <LeadlinkLogoMark size={size} onDark={onDark} />
+      <AugmenticsLogoMark size={size} onDark={onDark} />
       <div>
-        <div style={{ fontSize: Math.round(size * 0.325), fontWeight: 700, color: textColor, letterSpacing: '0.4px', fontFamily: "'Syne', sans-serif", lineHeight: 1.1 }}>
-          LEADLINK <span style={{ color: '#2B96D4' }}>SOLUTIONS</span>
+        <div style={{
+          fontSize: Math.round(size * 0.34),
+          fontWeight: 800,
+          color: textColor,
+          letterSpacing: '1.2px',
+          fontFamily: "'Syne', sans-serif",
+          lineHeight: 1.05,
+        }}>
+          AUGMENTICS <span style={{ color: ACCENT }}>AI</span>
         </div>
-        <div style={{ fontSize: Math.round(size * 0.225), color: subColor, letterSpacing: '1.2px', textTransform: 'uppercase', marginTop: 2, fontFamily: 'Inter, sans-serif' }}>
-          Property Management
+        <div style={{
+          fontSize: Math.round(size * 0.22),
+          color: subColor,
+          letterSpacing: '1.4px',
+          textTransform: 'uppercase',
+          marginTop: 3,
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 500,
+        }}>
+          Real Estate Intelligence
         </div>
       </div>
     </div>
   )
 }
 
-// Legacy aliases — keep imports working across all files
-export const AugmenticsLogoMark  = LeadlinkLogoMark
-export const AugmenticsLogoBrand = LeadlinkLogoBrand
+// Legacy aliases — keep older imports working
+export const LeadlinkLogoMark  = AugmenticsLogoMark
+export const LeadlinkLogoBrand = AugmenticsLogoBrand

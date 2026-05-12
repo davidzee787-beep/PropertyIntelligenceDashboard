@@ -9,11 +9,19 @@ html, body, #root {
 }
 
 body {
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   background: #080C18;
   color: #F1F5F9;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  letter-spacing: -0.005em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Syne', 'Inter', sans-serif;
+  letter-spacing: -0.02em;
 }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }

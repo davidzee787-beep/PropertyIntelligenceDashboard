@@ -128,7 +128,7 @@ export default function LoginPage() {
     forgot: 'Reset your password',
   }
   const subtitles = {
-    signin: 'Sign in to your Leadlink Solutions dashboard',
+    signin: 'Sign in to your Augmentics AI dashboard',
     signup: 'Set up your property management account',
     forgot: "We'll send a reset link to your email",
   }
@@ -155,41 +155,45 @@ export default function LoginPage() {
         }} />
 
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 64 }}>
-          <AugmenticsLogoMark size={44} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 72, position: 'relative', zIndex: 1 }}>
+          <AugmenticsLogoMark size={42} onDark={true} />
           <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#F1F5F9', letterSpacing: '0.4px', fontFamily: "'Syne', sans-serif" }}>
-              LEADLINK <span style={{ color: C.blueLt }}>SOLUTIONS</span>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#F1F5F9', letterSpacing: '1.4px', fontFamily: "'Syne', sans-serif", lineHeight: 1 }}>
+              AUGMENTICS <span style={{ color: C.blueLt }}>AI</span>
             </div>
-            <div style={{ fontSize: 10, color: '#64748B', letterSpacing: '1.4px', textTransform: 'uppercase', marginTop: 1 }}>
-              Property Management
+            <div style={{ fontSize: 10, color: '#64748B', letterSpacing: '1.6px', textTransform: 'uppercase', marginTop: 4, fontWeight: 500 }}>
+              Real Estate Intelligence
             </div>
           </div>
         </div>
 
         {/* Headline */}
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 36, fontWeight: 800, color: '#F1F5F9', lineHeight: 1.2, marginBottom: 16, fontFamily: 'Syne, sans-serif' }}>
-            Manage your<br />
-            <span style={{ color: C.blueLt }}>entire portfolio</span><br />
-            in one place.
+        <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${C.blueLt}18`, border: `1px solid ${C.blueLt}30`, borderRadius: 99, padding: '6px 14px', marginBottom: 24 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.blueLt, boxShadow: `0 0 12px ${C.blueLt}` }} />
+            <span style={{ fontSize: 11, color: '#CBD5E1', fontWeight: 600, letterSpacing: '0.6px', textTransform: 'uppercase' }}>Built for portfolio managers</span>
           </div>
-          <div style={{ fontSize: 14, color: '#94A3B8', lineHeight: 1.7, marginBottom: 48, maxWidth: 380 }}>
-            Track rent, maintenance, and tenants across all your properties — with live updates and AI-powered insights.
+          <div style={{ fontSize: 44, fontWeight: 800, color: '#F8FAFC', lineHeight: 1.1, marginBottom: 20, fontFamily: 'Syne, sans-serif', letterSpacing: '-0.5px' }}>
+            Intelligence for<br />
+            <span style={{ color: C.blueLt }}>every property</span><br />
+            in your portfolio.
+          </div>
+          <div style={{ fontSize: 15, color: '#94A3B8', lineHeight: 1.65, marginBottom: 56, maxWidth: 420, fontWeight: 400 }}>
+            Track rent, maintenance, and tenant activity in real time — with live updates and AI-powered insights across every unit you manage.
           </div>
 
           {/* Feature list */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
             {features.map(f => (
-              <div key={f.title} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+              <div key={f.title} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
                 <div style={{
-                  width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-                  background: `${C.blue}30`, border: `1px solid ${C.blue}40`,
+                  width: 42, height: 42, borderRadius: 11, flexShrink: 0,
+                  background: `${C.blue}28`, border: `1px solid ${C.blue}40`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.blueLt,
                 }}>{f.icon}</div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#E2E8F0', marginBottom: 2 }}>{f.title}</div>
-                  <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.5 }}>{f.desc}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#F1F5F9', marginBottom: 3, letterSpacing: '-0.1px' }}>{f.title}</div>
+                  <div style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.55, fontWeight: 400 }}>{f.desc}</div>
                 </div>
               </div>
             ))}
@@ -197,8 +201,8 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom */}
-        <div style={{ fontSize: 11, color: '#334155', marginTop: 48 }}>
-          © 2026 Leadlink Solutions · Dubai, UAE · All rights reserved
+        <div style={{ fontSize: 11, color: '#475569', marginTop: 56, fontWeight: 500, letterSpacing: '0.3px', position: 'relative', zIndex: 1 }}>
+          © 2026 Augmentics AI · Dubai, UAE · All rights reserved
         </div>
       </div>
 
@@ -214,40 +218,41 @@ export default function LoginPage() {
 
           {/* Logo — mobile only (left panel is hidden) */}
           {isMobile && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36 }}>
               <AugmenticsLogoMark size={36} onDark={false} />
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: C.t1, letterSpacing: '0.3px', fontFamily: 'Syne, sans-serif' }}>
-                  LEADLINK <span style={{ color: C.blue }}>SOLUTIONS</span>
+                <div style={{ fontSize: 14, fontWeight: 800, color: C.t1, letterSpacing: '1.2px', fontFamily: 'Syne, sans-serif', lineHeight: 1 }}>
+                  AUGMENTICS <span style={{ color: C.blue }}>AI</span>
                 </div>
-                <div style={{ fontSize: 10, color: C.t3, letterSpacing: '1px', textTransform: 'uppercase' }}>Property Management</div>
+                <div style={{ fontSize: 10, color: C.t3, letterSpacing: '1.4px', textTransform: 'uppercase', marginTop: 3, fontWeight: 500 }}>Real Estate Intelligence</div>
               </div>
             </div>
           )}
 
           {/* Heading */}
           <div style={{ marginBottom: 32 }}>
-            <div style={{ fontSize: 26, fontWeight: 700, color: C.t1, fontFamily: 'Syne, sans-serif', marginBottom: 6 }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color: C.t1, fontFamily: 'Syne, sans-serif', marginBottom: 8, letterSpacing: '-0.4px' }}>
               {titles[mode]}
             </div>
-            <div style={{ fontSize: 13, color: C.t3 }}>{subtitles[mode]}</div>
+            <div style={{ fontSize: 13, color: C.t3, fontWeight: 400, lineHeight: 1.5 }}>{subtitles[mode]}</div>
           </div>
 
           {/* Mode tabs (signin/signup only) */}
           {mode !== 'forgot' && (
             <div style={{
-              display: 'flex', background: C.bg, borderRadius: 8, padding: 4, marginBottom: 28,
+              display: 'flex', background: C.bg, borderRadius: 10, padding: 4, marginBottom: 28,
             }}>
               {[['signin', 'Sign In'], ['signup', 'Sign Up']].map(([m, lbl]) => (
                 <button key={m} onClick={() => { setMode(m); setError(''); setMessage('') }}
                   style={{
-                    flex: 1, padding: '8px', borderRadius: 6, border: 'none',
+                    flex: 1, padding: '10px', borderRadius: 7, border: 'none',
                     background: mode === m ? C.white : 'transparent',
                     color: mode === m ? C.t1 : C.t3,
-                    fontWeight: mode === m ? 600 : 400,
+                    fontWeight: mode === m ? 700 : 500,
                     fontSize: 13, cursor: 'pointer',
                     boxShadow: mode === m ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
                     transition: 'all 0.15s', fontFamily: 'inherit',
+                    letterSpacing: '0.2px',
                   }}>{lbl}</button>
               ))}
             </div>

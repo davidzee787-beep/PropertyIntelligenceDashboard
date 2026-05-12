@@ -818,6 +818,7 @@ function Sidebar({ tab, setTab, setSel, profileOpen, setProfileOpen, profileRef,
       width: 64, background: C.sidebar, display: "flex", flexDirection: "column",
       alignItems: "center", padding: "0 0 20px", flexShrink: 0, minHeight: "100vh",
       position: "sticky", top: 0, height: "100vh", borderRight: `1px solid ${C.border}`,
+      zIndex: 100,
     }}>
       {/* Logo mark */}
       <div style={{ padding: "16px 0 14px", borderBottom: `1px solid ${C.border}`, width: "100%", display: "flex", justifyContent: "center", marginBottom: 10 }}>
@@ -904,10 +905,10 @@ function Topbar({ tab, notifOpen, setNotifOpen, notifRef, openMaint, theme, togg
 
       {/* Center: logo (desktop only) */}
       {!isMobile && (
-        <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 8 }}>
-          <AugmenticsLogoMark size={26} onDark />
-          <div style={{ fontSize: 13, fontWeight: 700, color: C.t1, letterSpacing: "0.3px", fontFamily: "'Syne', sans-serif" }}>
-            LEADLINK <span style={{ color: C.blue }}>SOLUTIONS</span>
+        <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 10 }}>
+          <AugmenticsLogoMark size={28} onDark={theme === 'dark'} />
+          <div style={{ fontSize: 14, fontWeight: 800, color: C.t1, letterSpacing: "1.2px", fontFamily: "'Syne', sans-serif", lineHeight: 1 }}>
+            AUGMENTICS <span style={{ color: C.blue }}>AI</span>
           </div>
         </div>
       )}
@@ -1659,7 +1660,7 @@ function AssistantTab({ properties, payments, maintenance, displayName }) {
             <AugmenticsLogoMark size={22} onDark />
           </div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Leadlink — Portfolio Assistant</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Augmentics — Portfolio Assistant</div>
             <div style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", marginTop: 1 }}>
               {properties.length} propert{properties.length === 1 ? "y" : "ies"} · {unitCount} units · AED {totalRent.toLocaleString()}/mo
             </div>
@@ -2157,7 +2158,7 @@ function AISidePanel({ properties, payments, maintenance, displayName }) {
           <AugmenticsLogoMark size={20} onDark />
         </div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: C.t1 }}>Leadlink Assistant</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.t1 }}>Augmentics Assistant</div>
           <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.green, animation: "pulse 2s ease-in-out infinite" }} />
             <span style={{ fontSize: 10, color: C.green, fontWeight: 600 }}>Online</span>

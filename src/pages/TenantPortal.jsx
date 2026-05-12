@@ -636,10 +636,10 @@ export default function TenantPortal() {
           <AugmenticsLogoMark size={28} onDark={false} />
           {!isMobile && (
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif", letterSpacing: '0.3px' }}>
-                LEADLINK <span style={{ color: C.blue }}>SOLUTIONS</span>
+              <div style={{ fontSize: 14, fontWeight: 800, color: C.t1, fontFamily: "'Syne', sans-serif", letterSpacing: '1.2px', lineHeight: 1 }}>
+                AUGMENTICS <span style={{ color: C.blue }}>AI</span>
               </div>
-              <div style={{ fontSize: 10, color: C.t3, letterSpacing: '1px', textTransform: 'uppercase' }}>Tenant Portal</div>
+              <div style={{ fontSize: 10, color: C.t3, letterSpacing: '1.4px', textTransform: 'uppercase', marginTop: 3, fontWeight: 500 }}>Tenant Portal</div>
             </div>
           )}
           {isMobile && <div style={{ fontSize: 13, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif" }}>Tenant Portal</div>}
