@@ -1,79 +1,344 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { AugmenticsLogoMark } from '../components/Logo'
-import { useBreakpoint } from '../hooks/useBreakpoint'
 
-const C = {
-  bg:      '#F0F2F8',
-  white:   '#FFFFFF',
-  navy:    '#09112A',
-  navyMd:  '#111E3C',
-  blue:    '#1B5FD8',
-  blueLt:  '#3B7EF6',
-  bluePl:  '#EBF1FD',
-  t1:      '#0D1117',
-  t2:      '#374151',
-  t3:      '#6B7280',
-  t4:      '#9CA3AF',
-  border:  '#E5E7EB',
-  green:   '#059669',
-  red:     '#DC2626',
-  redPl:   '#FEF2F2',
+const LOGO_SRC = `${import.meta.env.BASE_URL}augmentics-logo.png`
+
+// Styles are embedded so the design from Augmentics-AI/Sign In.html is preserved
+// pixel-faithfully (gradients, mask, hover transitions, focus rings, etc.).
+const CSS = `
+.la-page{
+  --bg:#ffffff; --ink:#0B1220; --ink-2:#1A2233;
+  --muted:#5B6577; --muted-2:#8893A4;
+  --line:#E6E9EE; --line-2:#EEF1F5; --field:#F6F8FA;
+  --brand:#1F6BFF; --brand-600:#1559E6; --brand-700:#1149BD;
+  --night:#0A1020; --night-2:#0E1628; --night-3:#131D34;
+  --on-night:#E7ECF5; --on-night-muted:#9AA6BD;
+  --on-night-line:rgba(255,255,255,.08);
+  --radius:12px;
+  display:grid; grid-template-columns:1.05fr .95fr; min-height:100vh;
+  font-family:"Inter",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  font-feature-settings:"cv11","ss01","ss03";
+  color:var(--ink); background:var(--bg);
+}
+.la-hero{
+  position:relative;
+  background:
+    radial-gradient(1100px 600px at -10% -10%, rgba(31,107,255,.22), transparent 60%),
+    radial-gradient(900px 700px at 110% 110%, rgba(31,107,255,.10), transparent 55%),
+    linear-gradient(180deg,#0A1020 0%,#0B1326 60%,#0A1020 100%);
+  color:var(--on-night);
+  padding:40px 56px 40px;
+  display:flex; flex-direction:column;
+  overflow:hidden; isolation:isolate;
+}
+.la-hero::before{
+  content:""; position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:48px 48px; background-position:-1px -1px;
+  -webkit-mask-image:radial-gradient(ellipse at 30% 40%, #000 30%, transparent 80%);
+          mask-image:radial-gradient(ellipse at 30% 40%, #000 30%, transparent 80%);
+  z-index:-1;
+}
+.la-hero::after{
+  content:""; position:absolute; right:-160px; top:-160px;
+  width:520px; height:520px; border-radius:50%;
+  background:radial-gradient(closest-side, rgba(31,107,255,.35), rgba(31,107,255,0) 70%);
+  filter:blur(6px); z-index:-1;
+}
+.la-brand{ display:flex; align-items:center; gap:12px; position:relative; z-index:1 }
+.la-brand-mark{
+  width:40px; height:40px; display:grid; place-items:center;
+  border:1px solid var(--on-night-line);
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0));
+  border-radius:10px;
+}
+.la-brand-mark img{ width:26px; height:26px; display:block }
+.la-brand-name{ display:flex; flex-direction:column; line-height:1 }
+.la-brand-name .row1{
+  font-family:"Inter Tight",Inter,sans-serif; font-weight:700;
+  letter-spacing:.02em; font-size:16px;
+}
+.la-brand-name .row1 em{ font-style:normal; color:var(--brand) }
+.la-brand-name .row2{
+  font-size:10.5px; letter-spacing:.22em; color:var(--on-night-muted);
+  margin-top:6px; text-transform:uppercase;
 }
 
-// Google SVG icon
-const GoogleIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 48 48">
-    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-    <path fill="none" d="M0 0h48v48H0z"/>
-  </svg>
-)
+.la-hero-body{ margin-top:auto; padding-top:56px; max-width:560px; position:relative; z-index:1 }
+.la-eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  border:1px solid var(--on-night-line);
+  background:rgba(255,255,255,.03);
+  border-radius:999px; padding:6px 12px;
+  color:var(--on-night-muted);
+  font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; font-weight:600;
+}
+.la-eyebrow .dot{
+  width:6px; height:6px; border-radius:50%;
+  background:var(--brand); box-shadow:0 0 0 4px rgba(31,107,255,.18);
+}
+.la-headline{
+  font-family:"Inter Tight",Inter,sans-serif; font-weight:600;
+  font-size:60px; line-height:1.04; letter-spacing:-0.025em;
+  margin:22px 0 18px; color:#F4F7FC; text-wrap:balance;
+}
+.la-headline .accent{ color:var(--brand) }
+.la-lede{ color:var(--on-night-muted); font-size:16px; line-height:1.6; max-width:520px; margin:0 }
+
+.la-features{ margin-top:44px; display:grid; gap:14px; max-width:560px }
+.la-feature{
+  display:grid; grid-template-columns:42px 1fr auto; gap:16px; align-items:center;
+  border:1px solid var(--on-night-line);
+  background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0));
+  border-radius:14px; padding:14px 16px;
+  transition:border-color .18s ease, background .18s ease;
+}
+.la-feature:hover{ border-color:rgba(31,107,255,.45); background:rgba(31,107,255,.05) }
+.la-feature .icon{
+  width:42px; height:42px; border-radius:10px; display:grid; place-items:center;
+  background:rgba(31,107,255,.14); border:1px solid rgba(31,107,255,.25);
+  color:#A9C4FF;
+}
+.la-feature .title{ font-size:14.5px; font-weight:600; color:#EAF0FB; letter-spacing:-.005em }
+.la-feature .desc{ font-size:13px; color:var(--on-night-muted); margin-top:2px; line-height:1.45 }
+.la-feature .kbd{ font-size:10.5px; letter-spacing:.16em; color:#6E7C97; text-transform:uppercase }
+
+.la-hero-foot{
+  margin-top:auto; padding-top:36px;
+  display:flex; justify-content:space-between; align-items:center;
+  color:#6E7C97; font-size:12px; letter-spacing:.04em;
+  position:relative; z-index:1;
+}
+.la-hero-foot .sep{ margin:0 10px; opacity:.5 }
+
+/* ---------- AUTH (right) ---------- */
+.la-auth{
+  display:flex; flex-direction:column;
+  padding:32px 56px 32px;
+  background:#fff; position:relative;
+}
+.la-auth-top{
+  display:flex; justify-content:flex-end; align-items:center; gap:10px;
+  color:var(--muted); font-size:13px;
+}
+.la-ghost-link{
+  text-decoration:none; color:var(--ink); font-weight:600;
+  padding:8px 14px; border:1px solid var(--line); border-radius:8px; background:#fff;
+  cursor:pointer; font-family:inherit; font-size:13px;
+  transition:background .15s ease, border-color .15s ease;
+}
+.la-ghost-link:hover{ background:var(--field); border-color:#D6DBE3 }
+
+.la-card{
+  margin:auto 0; width:100%; max-width:440px; margin-left:auto; margin-right:auto;
+  padding:8px 0;
+}
+.la-auth-eyebrow{
+  font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted-2); font-weight:600;
+}
+.la-auth-title{
+  font-family:"Inter Tight",Inter,sans-serif; font-weight:600;
+  font-size:34px; line-height:1.1; letter-spacing:-.022em;
+  margin:10px 0 8px; color:var(--ink);
+}
+.la-auth-sub{ font-size:14.5px; color:var(--muted); line-height:1.55; margin:0 }
+
+.la-tabs{
+  margin-top:24px; display:grid; grid-template-columns:1fr 1fr; gap:6px;
+  padding:5px; background:var(--field); border-radius:10px; border:1px solid var(--line);
+}
+.la-tab{
+  border:0; background:transparent; padding:10px 12px; border-radius:7px;
+  font-weight:600; font-size:13.5px; color:var(--muted); cursor:pointer;
+  letter-spacing:-.005em; font-family:inherit;
+  transition:background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.la-tab[aria-selected="true"]{
+  background:#fff; color:var(--ink);
+  box-shadow:0 1px 2px rgba(11,18,32,.06),0 0 0 1px rgba(11,18,32,.04);
+}
+
+.la-oauth{
+  margin-top:18px; display:flex; align-items:center; justify-content:center; gap:10px;
+  width:100%; padding:11px 14px; border-radius:10px; border:1px solid var(--line);
+  background:#fff; font-weight:600; font-size:14px; color:var(--ink);
+  cursor:pointer; font-family:inherit;
+  transition:background .15s ease, border-color .15s ease;
+}
+.la-oauth:hover{ background:var(--field); border-color:#D6DBE3 }
+.la-oauth:disabled{ opacity:.6; cursor:not-allowed }
+.la-oauth svg{ width:18px; height:18px }
+
+.la-divider{
+  display:flex; align-items:center; gap:12px; margin:18px 0;
+  color:var(--muted-2); font-size:12px;
+}
+.la-divider::before, .la-divider::after{ content:""; height:1px; flex:1; background:var(--line) }
+
+.la-field{ display:flex; flex-direction:column; gap:7px; margin-bottom:14px }
+.la-field label{
+  font-size:12px; font-weight:600; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted);
+}
+.la-row-label{ display:flex; justify-content:space-between; align-items:center }
+.la-input-wrap{ position:relative }
+.la-input{
+  width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--line);
+  background:#fff; color:var(--ink); font-size:14.5px; font-family:inherit;
+  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.la-input::placeholder{ color:#A5AEBE }
+.la-input:hover{ border-color:#D6DBE3 }
+.la-input:focus{
+  outline:none; border-color:var(--brand);
+  box-shadow:0 0 0 4px rgba(31,107,255,.14); background:#fff;
+}
+.la-input.with-icon{ padding-left:42px }
+.la-input.with-trail{ padding-right:72px }
+.la-input-icon{
+  position:absolute; left:13px; top:50%; transform:translateY(-50%);
+  color:#8C97A8; pointer-events:none;
+}
+.la-input-trail{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  background:transparent; border:0; font-size:11px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); font-weight:700;
+  cursor:pointer; padding:6px 8px; border-radius:6px; font-family:inherit;
+}
+.la-input-trail:hover{ background:var(--field); color:var(--ink) }
+
+.la-forgot{
+  font-size:12.5px; color:var(--brand); text-decoration:none;
+  font-weight:600; background:none; border:0; cursor:pointer;
+  padding:0; font-family:inherit;
+}
+.la-forgot:hover{ color:var(--brand-600); text-decoration:underline }
+
+.la-check-row{
+  display:flex; align-items:center; gap:10px;
+  margin:4px 0 18px; color:var(--muted); font-size:13px;
+}
+.la-check-row input{ width:16px; height:16px; accent-color:var(--brand) }
+
+.la-submit{
+  width:100%; padding:13px 16px; border-radius:10px; border:0; cursor:pointer;
+  background:var(--brand); color:#fff; font-weight:600; font-size:14.5px;
+  letter-spacing:-.005em; font-family:inherit;
+  box-shadow:0 1px 0 rgba(255,255,255,.18) inset, 0 6px 18px rgba(31,107,255,.28);
+  transition:transform .04s ease, background .15s ease, box-shadow .15s ease;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.la-submit:hover{
+  background:var(--brand-600);
+  box-shadow:0 1px 0 rgba(255,255,255,.18) inset, 0 8px 22px rgba(31,107,255,.34);
+}
+.la-submit:active{ transform:translateY(1px) }
+.la-submit:disabled{ opacity:.7; cursor:not-allowed }
+
+.la-security{
+  margin-top:18px; display:flex; align-items:center; gap:10px;
+  color:var(--muted); font-size:12px;
+}
+.la-security svg{ flex-shrink:0; color:var(--muted-2) }
+.la-security .dotsep{
+  width:3px; height:3px; border-radius:50%;
+  background:#C8CFDA; display:inline-block; margin:0 8px; vertical-align:middle;
+}
+
+.la-tenant{
+  margin-top:22px; border:1px solid var(--line); border-radius:12px; padding:14px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; background:#FAFBFD;
+}
+.la-tenant .t-title{ font-weight:600; color:var(--ink); font-size:13.5px }
+.la-tenant .t-sub{ font-size:12.5px; color:var(--muted); margin-top:2px }
+.la-tenant .t-cta{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:13px; font-weight:600; color:var(--brand);
+  text-decoration:none; padding:8px 12px; border-radius:8px;
+  border:1px solid #DBE5FB; background:#fff;
+}
+.la-tenant .t-cta:hover{ background:#EEF3FE }
+
+.la-auth-foot{
+  margin-top:auto; padding-top:30px;
+  display:flex; justify-content:space-between; align-items:center;
+  color:var(--muted-2); font-size:12px;
+}
+.la-auth-foot a{ text-decoration:none; color:var(--muted) }
+.la-auth-foot a:hover{ color:var(--ink) }
+.la-auth-foot .links{ display:flex; gap:18px }
+
+.la-alert{
+  margin-top:14px; padding:10px 13px; border-radius:8px;
+  font-size:13px; font-weight:500;
+}
+.la-alert.err{ background:#FEF2F2; border:1px solid #FECACA; color:#B91C1C }
+.la-alert.ok{ background:#ECFDF5; border:1px solid #A7F3D0; color:#047857 }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1100px){
+  .la-headline{ font-size:50px }
+  .la-hero, .la-auth{ padding-left:40px; padding-right:40px }
+}
+@media (max-width: 880px){
+  .la-page{ grid-template-columns:1fr }
+  .la-hero{ padding:32px 24px 36px }
+  .la-auth{ padding:24px 24px 32px }
+  .la-hero-foot{ display:none }
+  .la-headline{ font-size:36px }
+  .la-features{ grid-template-columns:1fr }
+  .la-hero-body{ padding-top:32px }
+}
+`
 
 const FeatureIcon = {
   portfolio: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-4h6v4"/>
-    </svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
   ),
   payment: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
-    </svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
   ),
   maintenance: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-    </svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4Z"/></svg>
   ),
   ai: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 14v2M16 14v2"/>
-    </svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3"/><path d="M5.6 5.6 7.7 7.7"/><path d="M3 12h3"/><path d="M5.6 18.4 7.7 16.3"/><path d="M12 21v-3"/><path d="M18.4 18.4 16.3 16.3"/><path d="M21 12h-3"/><path d="M18.4 5.6 16.3 7.7"/><circle cx="12" cy="12" r="3.2"/></svg>
   ),
 }
 
 const features = [
-  { icon: FeatureIcon.portfolio,   title: 'Portfolio Overview',    desc: 'All properties, units, and occupancy at a glance' },
-  { icon: FeatureIcon.payment,     title: 'Live Payment Tracking', desc: 'Tenants submit payments directly — you see them instantly' },
-  { icon: FeatureIcon.maintenance, title: 'Maintenance Management',desc: 'Tenants log issues, you track and assign in real time' },
-  { icon: FeatureIcon.ai,          title: 'AI Assistant',          desc: 'Ask questions about your portfolio in plain English' },
+  { icon: FeatureIcon.portfolio,   title: 'Portfolio Overview',     desc: 'All properties, units, and occupancy at a glance.' },
+  { icon: FeatureIcon.payment,     title: 'Live Payment Tracking',  desc: 'Tenants submit payments directly — you see them instantly.' },
+  { icon: FeatureIcon.maintenance, title: 'Maintenance Management', desc: 'Tenants log issues, you track and assign in real time.' },
+  { icon: FeatureIcon.ai,          title: 'AI Assistant',           desc: 'Ask questions about your portfolio in plain English.' },
 ]
+
+const GoogleIcon = () => (
+  <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.17-1.84H9v3.49h4.84a4.14 4.14 0 0 1-1.8 2.71v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62Z"/>
+    <path fill="#34A853" d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.91-2.26c-.81.54-1.84.87-3.05.87-2.34 0-4.32-1.58-5.03-3.71H.92v2.33A8.997 8.997 0 0 0 9 18Z"/>
+    <path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.92A8.997 8.997 0 0 0 0 9c0 1.45.35 2.82.92 4.05l3.05-2.33Z"/>
+    <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A8.997 8.997 0 0 0 .92 4.95l3.05 2.33C4.68 5.16 6.66 3.58 9 3.58Z"/>
+  </svg>
+)
 
 export default function LoginPage() {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth()
-  const { isMobile } = useBreakpoint()
 
   const [mode, setMode]         = useState('signin') // 'signin' | 'signup' | 'forgot'
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [name, setName]         = useState('')
+  const [keepSignedIn, setKeep] = useState(true)
+  const [showPass, setShowPass] = useState(false)
   const [error, setError]       = useState('')
   const [message, setMessage]   = useState('')
   const [loading, setLoading]   = useState(false)
-  const [showPass, setShowPass] = useState(false)
 
   const handle = async (e) => {
     e.preventDefault()
@@ -89,10 +354,9 @@ export default function LoginPage() {
         const { error, needsConfirmation } = await signUpWithEmail(email, password, name, 'owner')
         if (error) throw error
         if (needsConfirmation) {
-          setMessage('Account created! Check your email to confirm your address, then sign in.')
+          setMessage('Account created! Check your email to confirm, then sign in.')
           setMode('signin')
         }
-        // If no needsConfirmation, session was returned and onAuthStateChange will redirect automatically
       } else {
         const { error } = await signInWithEmail(email, password)
         if (error) throw error
@@ -105,300 +369,194 @@ export default function LoginPage() {
   }
 
   const handleGoogle = async () => {
-    setError('')
+    setError(''); setLoading(true)
     const { error } = await signInWithGoogle()
     if (error) setError(error.message)
+    setLoading(false)
   }
-
-  const inputStyle = (focused) => ({
-    width: '100%', padding: '11px 14px',
-    border: `1.5px solid ${focused ? C.blue : C.border}`,
-    borderRadius: 8, fontSize: 13, color: C.t1,
-    background: C.white, outline: 'none',
-    transition: 'border-color 0.15s',
-    fontFamily: 'Inter, sans-serif',
-    boxShadow: focused ? `0 0 0 3px ${C.blue}14` : 'none',
-  })
-
-  const [focusedField, setFocusedField] = useState(null)
 
   const titles = {
-    signin: 'Welcome back',
-    signup: 'Create your account',
-    forgot: 'Reset your password',
+    signin: 'Welcome back.',
+    signup: 'Create your account.',
+    forgot: 'Reset your password.',
   }
   const subtitles = {
-    signin: 'Sign in to your Augmentics AI dashboard',
-    signup: 'Set up your property management account',
-    forgot: "We'll send a reset link to your email",
+    signin: 'Sign in to access your Augmentics AI dashboard.',
+    signup: 'Set up your property management account.',
+    forgot: "Enter your email — we'll send a reset link.",
+  }
+  const submitLabel = {
+    signin: 'Sign in to dashboard',
+    signup: 'Create account',
+    forgot: 'Send reset link',
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
+    <>
+      <style>{CSS}</style>
+      <main className="la-page" data-screen-label="01 Sign In">
 
-      {/* ── LEFT PANEL — hidden on mobile ── */}
-      <div style={{
-        width: '55%', background: C.navy,
-        display: isMobile ? 'none' : 'flex', flexDirection: 'column',
-        padding: '48px 56px', position: 'relative', overflow: 'hidden',
-      }}>
-        {/* Background decoration */}
-        <div style={{
-          position: 'absolute', top: -120, right: -120,
-          width: 400, height: 400, borderRadius: '50%',
-          background: `${C.blue}18`, pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: -80, left: -60,
-          width: 300, height: 300, borderRadius: '50%',
-          background: `${C.blueLt}10`, pointerEvents: 'none',
-        }} />
-
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 72, position: 'relative', zIndex: 1 }}>
-          <AugmenticsLogoMark size={42} onDark={true} />
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#F1F5F9', letterSpacing: '1.4px', fontFamily: "'Syne', sans-serif", lineHeight: 1 }}>
-              AUGMENTICS <span style={{ color: C.blueLt }}>AI</span>
-            </div>
-            <div style={{ fontSize: 10, color: '#64748B', letterSpacing: '1.6px', textTransform: 'uppercase', marginTop: 4, fontWeight: 500 }}>
-              Real Estate Intelligence
+        {/* =================== LEFT: HERO =================== */}
+        <aside className="la-hero">
+          <div className="la-brand" aria-label="Augmentics AI">
+            <div className="la-brand-mark"><img src={LOGO_SRC} alt="" /></div>
+            <div className="la-brand-name">
+              <div className="row1">Augmentics<em> AI</em></div>
+              <div className="row2">Real Estate Intelligence</div>
             </div>
           </div>
-        </div>
 
-        {/* Headline */}
-        <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${C.blueLt}18`, border: `1px solid ${C.blueLt}30`, borderRadius: 99, padding: '6px 14px', marginBottom: 24 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.blueLt, boxShadow: `0 0 12px ${C.blueLt}` }} />
-            <span style={{ fontSize: 11, color: '#CBD5E1', fontWeight: 600, letterSpacing: '0.6px', textTransform: 'uppercase' }}>Built for portfolio managers</span>
-          </div>
-          <div style={{ fontSize: 44, fontWeight: 800, color: '#F8FAFC', lineHeight: 1.1, marginBottom: 20, fontFamily: 'Syne, sans-serif', letterSpacing: '-0.5px' }}>
-            Intelligence for<br />
-            <span style={{ color: C.blueLt }}>every property</span><br />
-            in your portfolio.
-          </div>
-          <div style={{ fontSize: 15, color: '#94A3B8', lineHeight: 1.65, marginBottom: 56, maxWidth: 420, fontWeight: 400 }}>
-            Track rent, maintenance, and tenant activity in real time — with live updates and AI-powered insights across every unit you manage.
-          </div>
+          <div className="la-hero-body">
+            <span className="la-eyebrow"><span className="dot" />Built for portfolio managers</span>
+            <h1 className="la-headline">Intelligence for <span className="accent">every property</span> in your portfolio.</h1>
+            <p className="la-lede">Track rent, maintenance, and tenant activity in real time — with live updates and AI-powered insights across every unit you manage.</p>
 
-          {/* Feature list */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-            {features.map(f => (
-              <div key={f.title} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-                <div style={{
-                  width: 42, height: 42, borderRadius: 11, flexShrink: 0,
-                  background: `${C.blue}28`, border: `1px solid ${C.blue}40`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.blueLt,
-                }}>{f.icon}</div>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#F1F5F9', marginBottom: 3, letterSpacing: '-0.1px' }}>{f.title}</div>
-                  <div style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.55, fontWeight: 400 }}>{f.desc}</div>
+            <div className="la-features">
+              {features.map((f, i) => (
+                <div key={f.title} className="la-feature">
+                  <div className="icon" aria-hidden="true">{f.icon}</div>
+                  <div>
+                    <div className="title">{f.title}</div>
+                    <div className="desc">{f.desc}</div>
+                  </div>
+                  <div className="kbd">{String(i + 1).padStart(2, '0')}</div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom */}
-        <div style={{ fontSize: 11, color: '#475569', marginTop: 56, fontWeight: 500, letterSpacing: '0.3px', position: 'relative', zIndex: 1 }}>
-          © 2026 Augmentics AI · Dubai, UAE · All rights reserved
-        </div>
-      </div>
-
-      {/* ── RIGHT PANEL ── */}
-      <div style={{
-        width: isMobile ? '100%' : '45%',
-        background: C.white,
-        display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'center',
-        padding: isMobile ? '40px 24px' : '48px 56px',
-        minHeight: '100vh',
-      }}>
-        <div style={{ width: '100%', maxWidth: 400 }}>
-
-          {/* Logo — mobile only (left panel is hidden) */}
-          {isMobile && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36 }}>
-              <AugmenticsLogoMark size={36} onDark={false} />
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 800, color: C.t1, letterSpacing: '1.2px', fontFamily: 'Syne, sans-serif', lineHeight: 1 }}>
-                  AUGMENTICS <span style={{ color: C.blue }}>AI</span>
-                </div>
-                <div style={{ fontSize: 10, color: C.t3, letterSpacing: '1.4px', textTransform: 'uppercase', marginTop: 3, fontWeight: 500 }}>Real Estate Intelligence</div>
-              </div>
-            </div>
-          )}
-
-          {/* Heading */}
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ fontSize: 28, fontWeight: 800, color: C.t1, fontFamily: 'Syne, sans-serif', marginBottom: 8, letterSpacing: '-0.4px' }}>
-              {titles[mode]}
-            </div>
-            <div style={{ fontSize: 13, color: C.t3, fontWeight: 400, lineHeight: 1.5 }}>{subtitles[mode]}</div>
-          </div>
-
-          {/* Mode tabs (signin/signup only) */}
-          {mode !== 'forgot' && (
-            <div style={{
-              display: 'flex', background: C.bg, borderRadius: 10, padding: 4, marginBottom: 28,
-            }}>
-              {[['signin', 'Sign In'], ['signup', 'Sign Up']].map(([m, lbl]) => (
-                <button key={m} onClick={() => { setMode(m); setError(''); setMessage('') }}
-                  style={{
-                    flex: 1, padding: '10px', borderRadius: 7, border: 'none',
-                    background: mode === m ? C.white : 'transparent',
-                    color: mode === m ? C.t1 : C.t3,
-                    fontWeight: mode === m ? 700 : 500,
-                    fontSize: 13, cursor: 'pointer',
-                    boxShadow: mode === m ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-                    transition: 'all 0.15s', fontFamily: 'inherit',
-                    letterSpacing: '0.2px',
-                  }}>{lbl}</button>
               ))}
             </div>
-          )}
+          </div>
 
-          {/* Google button */}
-          {mode !== 'forgot' && (
-            <>
-              <button onClick={handleGoogle} disabled={loading}
-                style={{
-                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  gap: 10, padding: '11px 16px', borderRadius: 8, cursor: 'pointer',
-                  border: `1.5px solid ${C.border}`, background: C.white,
-                  fontSize: 13, fontWeight: 600, color: C.t1, fontFamily: 'inherit',
-                  transition: 'all 0.15s', marginBottom: 20,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = C.bg; e.currentTarget.style.borderColor = C.t4 }}
-                onMouseLeave={e => { e.currentTarget.style.background = C.white; e.currentTarget.style.borderColor = C.border }}
-              >
-                <GoogleIcon />
-                Continue with Google
+          <div className="la-hero-foot">
+            <div>© 2026 Augmentics AI<span className="sep">·</span>Dubai, UAE</div>
+            <div>v3.2 · Status: All systems operational</div>
+          </div>
+        </aside>
+
+        {/* =================== RIGHT: FORM =================== */}
+        <section className="la-auth">
+          <div className="la-auth-top">
+            {mode === 'signin' ? (
+              <>
+                <span>New to Augmentics?</span>
+                <button className="la-ghost-link" onClick={() => { setMode('signup'); setError(''); setMessage('') }}>Create account</button>
+              </>
+            ) : (
+              <>
+                <span>Already have an account?</span>
+                <button className="la-ghost-link" onClick={() => { setMode('signin'); setError(''); setMessage('') }}>Sign in</button>
+              </>
+            )}
+          </div>
+
+          <div className="la-card">
+            <div className="la-auth-eyebrow">Account</div>
+            <h2 className="la-auth-title">{titles[mode]}</h2>
+            <p className="la-auth-sub">{subtitles[mode]}</p>
+
+            {mode !== 'forgot' && (
+              <div className="la-tabs" role="tablist" aria-label="Authentication">
+                <button className="la-tab" role="tab" aria-selected={mode === 'signin'} onClick={() => { setMode('signin'); setError(''); setMessage('') }}>Sign in</button>
+                <button className="la-tab" role="tab" aria-selected={mode === 'signup'} onClick={() => { setMode('signup'); setError(''); setMessage('') }}>Sign up</button>
+              </div>
+            )}
+
+            {mode !== 'forgot' && (
+              <>
+                <button className="la-oauth" type="button" onClick={handleGoogle} disabled={loading}>
+                  <GoogleIcon />
+                  Continue with Google
+                </button>
+                <div className="la-divider">or continue with email</div>
+              </>
+            )}
+
+            <form onSubmit={handle}>
+              {mode === 'signup' && (
+                <div className="la-field">
+                  <label htmlFor="la-name">Full name</label>
+                  <div className="la-input-wrap">
+                    <span className="la-input-icon" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+                    </span>
+                    <input id="la-name" className="la-input with-icon" type="text" placeholder="Khaled Hamza" autoComplete="name" value={name} onChange={e => setName(e.target.value)} required />
+                  </div>
+                </div>
+              )}
+
+              <div className="la-field">
+                <label htmlFor="la-email">Email address</label>
+                <div className="la-input-wrap">
+                  <span className="la-input-icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                  </span>
+                  <input id="la-email" className="la-input with-icon" type="email" placeholder="khaled@example.com" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                </div>
+              </div>
+
+              {mode !== 'forgot' && (
+                <div className="la-field">
+                  <div className="la-row-label">
+                    <label htmlFor="la-password">Password</label>
+                    {mode === 'signin' && (
+                      <button type="button" className="la-forgot" onClick={() => { setMode('forgot'); setError(''); setMessage('') }}>Forgot password?</button>
+                    )}
+                  </div>
+                  <div className="la-input-wrap">
+                    <span className="la-input-icon" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                    </span>
+                    <input id="la-password" className="la-input with-icon with-trail" type={showPass ? 'text' : 'password'} placeholder="••••••••" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+                    <button type="button" className="la-input-trail" onClick={() => setShowPass(s => !s)}>{showPass ? 'Hide' : 'Show'}</button>
+                  </div>
+                </div>
+              )}
+
+              {mode === 'signin' && (
+                <label className="la-check-row">
+                  <input type="checkbox" checked={keepSignedIn} onChange={e => setKeep(e.target.checked)} />
+                  Keep me signed in on this device
+                </label>
+              )}
+
+              {error && <div className="la-alert err">{error}</div>}
+              {message && <div className="la-alert ok">{message}</div>}
+
+              <button className="la-submit" type="submit" disabled={loading}>
+                {loading ? 'Please wait…' : submitLabel[mode]}
+                {!loading && (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                )}
               </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-                <div style={{ flex: 1, height: 1, background: C.border }} />
-                <span style={{ fontSize: 11, color: C.t4, fontWeight: 500 }}>or continue with email</span>
-                <div style={{ flex: 1, height: 1, background: C.border }} />
+              <div className="la-security">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8.4 8 9 4.5-.6 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+                Secure login powered by Supabase
+                <span className="dotsep" />
+                Data stored in Dubai-region servers
               </div>
-            </>
-          )}
+            </form>
 
-          {/* Error / success messages */}
-          {error && (
-            <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 12, color: C.red }}>
-              {error}
-            </div>
-          )}
-          {message && (
-            <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 12, color: C.green }}>
-              {message}
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handle}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-
-              {/* Full name — signup only */}
-              {mode === 'signup' && (
-                <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: C.t2, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Full Name</label>
-                  <input
-                    type="text" placeholder="Khaled Hamza" value={name}
-                    onChange={e => setName(e.target.value)} required
-                    style={inputStyle(focusedField === 'name')}
-                    onFocus={() => setFocusedField('name')}
-                    onBlur={() => setFocusedField(null)}
-                  />
-                </div>
-              )}
-
-              {/* Email */}
+            <div className="la-tenant" role="group" aria-label="Tenant portal">
               <div>
-                <label style={{ fontSize: 11, fontWeight: 600, color: C.t2, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email Address</label>
-                <input
-                  type="email" placeholder="khaled@example.com" value={email}
-                  onChange={e => setEmail(e.target.value)} required
-                  style={inputStyle(focusedField === 'email')}
-                  onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField(null)}
-                />
+                <div className="t-title">Are you a tenant?</div>
+                <div className="t-sub">Pay rent, submit issues, and view your lease.</div>
               </div>
-
-              {/* Password — not on forgot */}
-              {mode !== 'forgot' && (
-                <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: C.t2, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Password</label>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type={showPass ? 'text' : 'password'}
-                      placeholder={mode === 'signup' ? 'Min 6 characters' : '••••••••'}
-                      value={password} onChange={e => setPassword(e.target.value)} required
-                      style={{ ...inputStyle(focusedField === 'pass'), paddingRight: 44 }}
-                      onFocus={() => setFocusedField('pass')}
-                      onBlur={() => setFocusedField(null)}
-                    />
-                    <button type="button" onClick={() => setShowPass(p => !p)}
-                      style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.t3, fontSize: 11, fontFamily: 'inherit', fontWeight: 600 }}>
-                      {showPass ? 'HIDE' : 'SHOW'}
-                    </button>
-                  </div>
-                  {mode === 'signin' && (
-                    <div style={{ textAlign: 'right', marginTop: 6 }}>
-                      <button type="button" onClick={() => { setMode('forgot'); setError(''); setMessage('') }}
-                        style={{ fontSize: 11, color: C.blue, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}>
-                        Forgot password?
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+              <a className="t-cta" href="#/tenant-login">
+                Tenant Portal
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+              </a>
             </div>
-
-            {/* Submit */}
-            <button type="submit" disabled={loading}
-              style={{
-                width: '100%', marginTop: 24, padding: '12px',
-                background: loading ? '#94A3B8' : C.blue,
-                border: 'none', borderRadius: 8,
-                color: '#fff', fontSize: 14, fontWeight: 700,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontFamily: 'inherit', transition: 'background 0.15s',
-                boxShadow: loading ? 'none' : `0 4px 14px ${C.blue}40`,
-              }}
-              onMouseEnter={e => { if (!loading) e.currentTarget.style.background = '#1249B0' }}
-              onMouseLeave={e => { if (!loading) e.currentTarget.style.background = C.blue }}
-            >
-              {loading ? 'Please wait…' : mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Send Reset Link'}
-            </button>
-          </form>
-
-          {/* Back to sign in from forgot */}
-          {mode === 'forgot' && (
-            <button onClick={() => { setMode('signin'); setError(''); setMessage('') }}
-              style={{ marginTop: 16, width: '100%', background: 'none', border: 'none', color: C.blue, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
-              ← Back to Sign In
-            </button>
-          )}
-
-          {/* Footer note */}
-          <div style={{ marginTop: 24, fontSize: 11, color: C.t4, textAlign: 'center', lineHeight: 1.6 }}>
-            {mode === 'signup'
-              ? 'By creating an account you agree to our Terms of Service and Privacy Policy.'
-              : 'Secure login powered by Supabase · Data stored in Dubai-region servers.'}
           </div>
 
-          {/* Tenant portal link */}
-          <div style={{ marginTop: 20, padding: '14px 16px', background: '#F8FAFF', border: `1px solid ${C.border}`, borderRadius: 10, textAlign: 'center' }}>
-            <div style={{ fontSize: 12, color: C.t3, marginBottom: 6 }}>Are you a <strong style={{ color: C.t2 }}>tenant</strong>?</div>
-            <a href="#/tenant-login" style={{ fontSize: 13, fontWeight: 600, color: C.blue, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="7"/><path d="M8 11v1M8 5v4"/><path d="M21 21l-4.35-4.35"/></svg>
-              Access Tenant Portal
-            </a>
+          <div className="la-auth-foot">
+            <span>© Augmentics AI</span>
+            <div className="links">
+              <a href="#terms">Terms</a>
+              <a href="#privacy">Privacy</a>
+              <a href="#help">Help</a>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </section>
+      </main>
+    </>
   )
 }
