@@ -39,7 +39,7 @@ const ThemeCtx = createContext(DARK);
 const useC = () => useContext(ThemeCtx);
 
 const fmt    = n => Number(n || 0).toLocaleString();
-const fmtAED = n => `${localStorage.getItem('aug_currency') || 'AED'} ${Number(n || 0).toLocaleString()}`;
+const fmtAED = n => `${localStorage.getItem('aug_currency') || 'KWD'} ${Number(n || 0).toLocaleString()}`;
 
 // ─── Tiny SVG icon set ────────────────────────────────────────────────────────
 const Icon = {
@@ -409,7 +409,7 @@ function AddPropertyModal({ onClose, onSaved }) {
 
           <div style={g2}>
             <Field label="City *">
-              <input style={inputSt} value={form.city} onChange={set("city")} placeholder="e.g. Dubai Hills" required />
+              <input style={inputSt} value={form.city} onChange={set("city")} placeholder="e.g. Salmiya" required />
             </Field>
             <Field label="Year Built">
               <input style={inputSt} type="number" value={form.yearBuilt} onChange={set("yearBuilt")} placeholder="e.g. 2018" min="1900" max="2100" />
@@ -779,23 +779,24 @@ function buildAICtx(properties, payments, maintenance) {
   const highMaint = openMaint.filter(m => m.priority === "High");
   const expiring  = properties.filter(p => p.daysLeft < 120);
 
+  const CCY = localStorage.getItem('aug_currency') || 'KWD';
   const propList = propCount
-    ? properties.map(p => `— ${p.name}: AED ${p.rent.toLocaleString()}/mo`).join("\n")
+    ? properties.map(p => `— ${p.name}: ${CCY} ${p.rent.toLocaleString()}/mo`).join("\n")
     : "— No active leases recorded yet. Add a property to get started.";
 
   return {
-    income:  `Your total rental income is **AED ${totalRent.toLocaleString()}**/month.\n\nBreakdown:\n${propList}\n\nCollected this period: **AED ${collected.toLocaleString()}**`,
+    income:  `Your total rental income is **${CCY} ${totalRent.toLocaleString()}**/month.\n\nBreakdown:\n${propList}\n\nCollected this period: **${CCY} ${collected.toLocaleString()}**`,
     expiry:  expiring.length === 0
       ? "No leases expiring in the next 120 days. Portfolio looks healthy."
-      : `${expiring.length} lease${expiring.length > 1 ? "s" : ""} need attention:\n\n${expiring.map(p => `— **${p.name}** (${p.code}): expires ${p.expiry}, **${p.daysLeft} days remaining**`).join("\n\n")}\n\nEstimated revenue at risk: **AED ${expiring.reduce((s, p) => s + p.rent, 0).toLocaleString()}/mo**`,
+      : `${expiring.length} lease${expiring.length > 1 ? "s" : ""} need attention:\n\n${expiring.map(p => `— **${p.name}** (${p.code}): expires ${p.expiry}, **${p.daysLeft} days remaining**`).join("\n\n")}\n\nEstimated revenue at risk: **${CCY} ${expiring.reduce((s, p) => s + p.rent, 0).toLocaleString()}/mo**`,
     maint:   openMaint.length === 0
       ? "No open maintenance requests — portfolio is fully clear."
       : `**${openMaint.length} open request${openMaint.length > 1 ? "s" : ""}** — **${highMaint.length} high priority**.\n\n${openMaint.slice(0, 5).map(m => `— ${m.ref}: ${m.issue} at **${m.prop}** (${m.priority})`).join("\n")}`,
     occ:     `Portfolio occupancy: **${avgOcc}% average** across ${unitCount} units.\n\n${properties.length ? properties.map(p => `— ${p.name}: **${p.occ}%**${p.occ === 100 ? " ✓" : p.occ === 0 ? " ⚠ Vacant" : ""}`).join("\n") : "— No properties yet."}`,
     overdue: overdueP.length === 0
       ? "No overdue payments — all tenants are current."
-      : `**${overdueP.length} overdue payment${overdueP.length > 1 ? "s" : ""}**:\n\n${overdueP.map(p => `— ${p.ref}: ${p.tenant}, ${p.prop}, **AED ${p.amount.toLocaleString()}** due ${p.date}`).join("\n")}`,
-    default: `I have full context on your portfolio — **${propCount} ${propCount === 1 ? "property" : "properties"}**, **${unitCount} units**, **AED ${totalRent.toLocaleString()}/mo** revenue.\n\nAsk me anything:\n— What is my total rental income?\n— Which leases expire soon?\n— Any urgent maintenance?\n— Current occupancy rate?\n— Any overdue payments?`,
+      : `**${overdueP.length} overdue payment${overdueP.length > 1 ? "s" : ""}**:\n\n${overdueP.map(p => `— ${p.ref}: ${p.tenant}, ${p.prop}, **${CCY} ${p.amount.toLocaleString()}** due ${p.date}`).join("\n")}`,
+    default: `I have full context on your portfolio — **${propCount} ${propCount === 1 ? "property" : "properties"}**, **${unitCount} units**, **${CCY} ${totalRent.toLocaleString()}/mo** revenue.\n\nAsk me anything:\n— What is my total rental income?\n— Which leases expire soon?\n— Any urgent maintenance?\n— Current occupancy rate?\n— Any overdue payments?`,
   };
 }
 
@@ -1662,7 +1663,7 @@ function AssistantTab({ properties, payments, maintenance, displayName }) {
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Augmentics — Portfolio Assistant</div>
             <div style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", marginTop: 1 }}>
-              {properties.length} propert{properties.length === 1 ? "y" : "ies"} · {unitCount} units · AED {totalRent.toLocaleString()}/mo
+              {properties.length} propert{properties.length === 1 ? "y" : "ies"} · {unitCount} units · {fmtAED(totalRent)}/mo
             </div>
           </div>
           <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, padding: "5px 10px" }}>

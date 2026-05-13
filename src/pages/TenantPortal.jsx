@@ -33,7 +33,7 @@ const C = {
 }
 
 const fmtDate = d => new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-const fmtAED  = n => `${localStorage.getItem('aug_currency') || 'AED'} ${Number(n || 0).toLocaleString()}`
+const fmtAED  = n => `${localStorage.getItem('aug_currency') || 'KWD'} ${Number(n || 0).toLocaleString()}`
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icon = {

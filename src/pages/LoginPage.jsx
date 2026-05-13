@@ -426,7 +426,7 @@ export default function LoginPage() {
           </div>
 
           <div className="la-hero-foot">
-            <div>© 2026 Augmentics AI<span className="sep">·</span>Dubai, UAE</div>
+            <div>© 2026 Augmentics AI<span className="sep">·</span>Kuwait City, Kuwait</div>
             <div>v3.2 · Status: All systems operational</div>
           </div>
         </aside>
@@ -531,7 +531,7 @@ export default function LoginPage() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8.4 8 9 4.5-.6 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
                 Secure login powered by Supabase
                 <span className="dotsep" />
-                Data stored in Dubai-region servers
+                GCC-region data residency
               </div>
             </form>
 

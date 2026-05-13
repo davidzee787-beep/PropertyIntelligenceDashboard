@@ -1,21 +1,22 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 
 export const GCC = [
-  { id: 'AE', country: 'UAE',          cities: 'Dubai · Abu Dhabi · Sharjah', currency: 'AED', flag: '🇦🇪' },
-  { id: 'SA', country: 'Saudi Arabia', cities: 'Riyadh · Jeddah · Dammam',   currency: 'SAR', flag: '🇸🇦' },
-  { id: 'KW', country: 'Kuwait',       cities: 'Kuwait City · Hawalli',       currency: 'KWD', flag: '🇰🇼' },
-  { id: 'BH', country: 'Bahrain',      cities: 'Manama · Riffa',              currency: 'BHD', flag: '🇧🇭' },
-  { id: 'QA', country: 'Qatar',        cities: 'Doha · Al Rayyan',            currency: 'QAR', flag: '🇶🇦' },
-  { id: 'OM', country: 'Oman',         cities: 'Muscat · Salalah',            currency: 'OMR', flag: '🇴🇲' },
+  { id: 'KW', country: 'Kuwait',       cities: 'Kuwait City · Hawalli · Salmiya', currency: 'KWD', flag: '🇰🇼' },
+  { id: 'AE', country: 'UAE',          cities: 'Dubai · Abu Dhabi · Sharjah',     currency: 'AED', flag: '🇦🇪' },
+  { id: 'SA', country: 'Saudi Arabia', cities: 'Riyadh · Jeddah · Dammam',        currency: 'SAR', flag: '🇸🇦' },
+  { id: 'BH', country: 'Bahrain',      cities: 'Manama · Riffa',                  currency: 'BHD', flag: '🇧🇭' },
+  { id: 'QA', country: 'Qatar',        cities: 'Doha · Al Rayyan',                currency: 'QAR', flag: '🇶🇦' },
+  { id: 'OM', country: 'Oman',         cities: 'Muscat · Salalah',                currency: 'OMR', flag: '🇴🇲' },
 ]
 
 const STORAGE_KEY = 'aug_region'
+const DEFAULT_REGION = GCC.find(r => r.id === 'KW') || GCC[0]
 
 function loadRegion() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
-    return GCC.find(r => r.id === saved?.id) || GCC[0]
-  } catch { return GCC[0] }
+    return GCC.find(r => r.id === saved?.id) || DEFAULT_REGION
+  } catch { return DEFAULT_REGION }
 }
 
 const Ctx = createContext(null)
