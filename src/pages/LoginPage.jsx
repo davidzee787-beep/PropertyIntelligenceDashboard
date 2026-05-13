@@ -58,7 +58,7 @@ const CSS = `
 .la-brand-mark img{ width:26px; height:26px; display:block }
 .la-brand-name{ display:flex; flex-direction:column; line-height:1 }
 .la-brand-name .row1{
-  font-family:"Inter Tight",Inter,sans-serif; font-weight:700;
+  font-family:"Montserrat",sans-serif; font-weight:700;
   letter-spacing:.02em; font-size:16px;
 }
 .la-brand-name .row1 em{ font-style:normal; color:var(--brand) }
@@ -81,7 +81,7 @@ const CSS = `
   background:var(--brand); box-shadow:0 0 0 4px rgba(31,107,255,.18);
 }
 .la-headline{
-  font-family:"Inter Tight",Inter,sans-serif; font-weight:600;
+  font-family:"Montserrat",sans-serif; font-weight:600;
   font-size:60px; line-height:1.04; letter-spacing:-0.025em;
   margin:22px 0 18px; color:#F4F7FC; text-wrap:balance;
 }
@@ -141,7 +141,7 @@ const CSS = `
   color:var(--muted-2); font-weight:600;
 }
 .la-auth-title{
-  font-family:"Inter Tight",Inter,sans-serif; font-weight:600;
+  font-family:"Montserrat",sans-serif; font-weight:600;
   font-size:34px; line-height:1.1; letter-spacing:-.022em;
   margin:10px 0 8px; color:var(--ink);
 }

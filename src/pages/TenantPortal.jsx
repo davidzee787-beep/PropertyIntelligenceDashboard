@@ -98,7 +98,7 @@ function Modal({ title, onClose, children }) {
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}>
       <div style={{ background: C.white, borderRadius: 16, width: '100%', maxWidth: 480, boxShadow: '0 24px 64px rgba(0,0,0,0.18)', maxHeight: '90vh', overflow: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 22px', borderBottom: `1px solid ${C.border}` }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif" }}>{title}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: C.t1, fontFamily: "'Montserrat', sans-serif" }}>{title}</div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.t3, display: 'flex', padding: 4, borderRadius: 6 }}>{Icon.x}</button>
         </div>
         <div style={{ padding: '20px 22px' }}>{children}</div>
@@ -288,7 +288,7 @@ function HomeTab({ lease, payments, maintenance, onPayNow, onReportIssue }) {
   if (!lease) return (
     <div style={{ textAlign: 'center', padding: '60px 0' }}>
       <div style={{ fontSize: 48, marginBottom: 16 }}>🏠</div>
-      <div style={{ fontSize: 20, fontWeight: 700, color: C.t1, marginBottom: 8, fontFamily: "'Syne', sans-serif" }}>No Active Lease</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color: C.t1, marginBottom: 8, fontFamily: "'Montserrat', sans-serif" }}>No Active Lease</div>
       <div style={{ fontSize: 14, color: C.t3, maxWidth: 360, margin: '0 auto', lineHeight: 1.7 }}>
         You don't have an active lease linked to your account. Contact your property manager to get set up.
       </div>
@@ -305,7 +305,7 @@ function HomeTab({ lease, payments, maintenance, onPayNow, onReportIssue }) {
       {/* Lease overview */}
       <div style={{ background: `linear-gradient(135deg, ${C.sidebar} 0%, #1A3060 100%)`, borderRadius: 16, padding: '24px 26px', color: '#fff' }}>
         <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600, marginBottom: 12 }}>Your Lease</div>
-        <div style={{ fontSize: 22, fontWeight: 800, fontFamily: "'Syne', sans-serif", marginBottom: 4 }}>{lease.units?.properties?.name}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, fontFamily: "'Montserrat', sans-serif", marginBottom: 4 }}>{lease.units?.properties?.name}</div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20 }}>
           {Icon.mapPin}
           Unit {lease.units?.unit_number} · {lease.units?.properties?.address || lease.units?.properties?.city || ''}
@@ -318,7 +318,7 @@ function HomeTab({ lease, payments, maintenance, onPayNow, onReportIssue }) {
           ].map(([l, v]) => (
             <div key={l} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '14px 16px' }}>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.7px', fontWeight: 600, marginBottom: 6 }}>{l}</div>
-              <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "'Syne', sans-serif", color: l === 'Days Remaining' && daysLeft < 60 && daysLeft >= 0 ? '#FCD34D' : '#fff' }}>{v}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "'Montserrat', sans-serif", color: l === 'Days Remaining' && daysLeft < 60 && daysLeft >= 0 ? '#FCD34D' : '#fff' }}>{v}</div>
             </div>
           ))}
         </div>
@@ -336,11 +336,11 @@ function HomeTab({ lease, payments, maintenance, onPayNow, onReportIssue }) {
           </div>
           {nextDueRaw
             ? <>
-                <div style={{ fontSize: 26, fontWeight: 800, color: C.t1, fontFamily: "'Syne', sans-serif" }}>{fmtAED(nextDueRaw.amount)}</div>
+                <div style={{ fontSize: 26, fontWeight: 800, color: C.t1, fontFamily: "'Montserrat', sans-serif" }}>{fmtAED(nextDueRaw.amount)}</div>
                 <div style={{ fontSize: 12, color: C.t3, marginTop: 4 }}>Due {fmtDate(nextDueRaw.due_date)}</div>
               </>
             : <>
-                <div style={{ fontSize: 26, fontWeight: 800, color: C.greenDk, fontFamily: "'Syne', sans-serif" }}>{fmtAED(lease.monthly_rent)}</div>
+                <div style={{ fontSize: 26, fontWeight: 800, color: C.greenDk, fontFamily: "'Montserrat', sans-serif" }}>{fmtAED(lease.monthly_rent)}</div>
                 <div style={{ fontSize: 12, color: C.t3, marginTop: 4 }}>Monthly rent · no pending dues</div>
               </>
           }
@@ -355,7 +355,7 @@ function HomeTab({ lease, payments, maintenance, onPayNow, onReportIssue }) {
             <div style={{ fontSize: 11, fontWeight: 700, color: C.t3, textTransform: 'uppercase', letterSpacing: '0.7px' }}>Maintenance</div>
             {openMaint > 0 && <span style={{ background: C.amberAlpha, color: C.amber, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20 }}>{openMaint} open</span>}
           </div>
-          <div style={{ fontSize: 26, fontWeight: 800, color: C.t1, fontFamily: "'Syne', sans-serif" }}>{maintenance.length}</div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: C.t1, fontFamily: "'Montserrat', sans-serif" }}>{maintenance.length}</div>
           <div style={{ fontSize: 12, color: C.t3, marginTop: 4 }}>
             {maintenance.length === 0 ? 'No requests logged' : `${openMaint} open · ${maintenance.length - openMaint} resolved`}
           </div>
@@ -414,7 +414,7 @@ function PaymentsTab({ payments, lease, onPay }) {
         ].map(([l, v, color, bg]) => (
           <div key={l} style={{ background: bg || C.white, border: `1px solid ${C.border}`, borderRadius: 12, padding: '18px 20px' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: C.t3, textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: 8 }}>{l}</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color, fontFamily: "'Syne', sans-serif" }}>{v}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color, fontFamily: "'Montserrat', sans-serif" }}>{v}</div>
           </div>
         ))}
       </div>
@@ -636,13 +636,13 @@ export default function TenantPortal() {
           <AugmenticsLogoMark size={28} onDark={false} />
           {!isMobile && (
             <div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: C.t1, fontFamily: "'Syne', sans-serif", letterSpacing: '1.2px', lineHeight: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: C.t1, fontFamily: "'Montserrat', sans-serif", letterSpacing: '1.2px', lineHeight: 1 }}>
                 AUGMENTICS <span style={{ color: C.blue }}>AI</span>
               </div>
               <div style={{ fontSize: 10, color: C.t3, letterSpacing: '1.4px', textTransform: 'uppercase', marginTop: 3, fontWeight: 500 }}>Tenant Portal</div>
             </div>
           )}
-          {isMobile && <div style={{ fontSize: 13, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif" }}>Tenant Portal</div>}
+          {isMobile && <div style={{ fontSize: 13, fontWeight: 700, color: C.t1, fontFamily: "'Montserrat', sans-serif" }}>Tenant Portal</div>}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 14 }}>
@@ -672,7 +672,7 @@ export default function TenantPortal() {
         {/* Welcome + tabs */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: C.t1, fontFamily: "'Syne', sans-serif" }}>Hello, {displayName.split(' ')[0]}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: C.t1, fontFamily: "'Montserrat', sans-serif" }}>Hello, {displayName.split(' ')[0]}</div>
             <div style={{ fontSize: 13, color: C.t3, marginTop: 3 }}>
               {lease ? `${lease.units?.properties?.name} · Unit ${lease.units?.unit_number}` : 'No active lease found'}
             </div>

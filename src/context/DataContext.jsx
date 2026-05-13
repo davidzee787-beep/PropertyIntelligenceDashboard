@@ -378,6 +378,57 @@ export function DataProvider({ children }) {
     return { code }
   }, [refresh])
 
+  const updateMaintenanceStatus = useCallback(async (id, status) => {
+    // status: 'open' | 'in_progress' | 'resolved'
+    const { error } = await supabase.from('maintenance_requests').update({ status }).eq('id', id)
+    if (error) throw error
+    await refresh()
+  }, [refresh])
+
+  const updateTenant = useCallback(async (leaseId, form) => {
+    // form: { tenantName, monthlyRent, endDate, status, notes }
+    // 1. Update the lease row — keep tenant_name in notes for fallback display
+    const noteParts = []
+    noteParts.push(`Tenant: ${form.tenantName.trim()}`)
+    if (form.notes?.trim()) noteParts.push(form.notes.trim())
+
+    const leaseUpdate = {
+      monthly_rent: Number(form.monthlyRent),
+      end_date:     form.endDate,
+      status:       form.status || 'active',
+      notes:        noteParts.join(' | '),
+    }
+    const { data: leaseRow, error: leaseErr } = await supabase
+      .from('leases')
+      .update(leaseUpdate)
+      .eq('id', leaseId)
+      .select('tenant_id')
+      .single()
+    if (leaseErr) throw leaseErr
+
+    // 2. Update the tenant's profile name (if a profile is linked)
+    if (leaseRow?.tenant_id && form.tenantName?.trim()) {
+      await supabase.from('profiles')
+        .update({ full_name: form.tenantName.trim() })
+        .eq('id', leaseRow.tenant_id)
+    }
+
+    await refresh()
+  }, [refresh])
+
+  const deleteTenant = useCallback(async (leaseId, unitId) => {
+    // End the lease and free the unit
+    const { error: leaseErr } = await supabase
+      .from('leases')
+      .update({ status: 'ended', end_date: new Date().toISOString().split('T')[0] })
+      .eq('id', leaseId)
+    if (leaseErr) throw leaseErr
+    if (unitId) {
+      await supabase.from('units').update({ status: 'vacant' }).eq('id', unitId)
+    }
+    await refresh()
+  }, [refresh])
+
   const addPayment = useCallback(async (form) => {
     const { error } = await supabase.from('payments').insert({
       property_id:    form.propertyId || null,
@@ -399,6 +450,7 @@ export function DataProvider({ children }) {
     <Ctx.Provider value={{
       properties, payments, maintenance, tenants, revenueMonths,
       loading, refresh, addProperty, addUnit, addLease, addPayment,
+      updateMaintenanceStatus, updateTenant, deleteTenant,
     }}>
       {children}
     </Ctx.Provider>

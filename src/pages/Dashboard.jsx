@@ -264,7 +264,7 @@ function KPICard({ label, value, sub, icon, accent, onClick, sparkData, ring }) 
           : <div style={{ width: 34, height: 34, borderRadius: 9, background: `${accent}18`, display: "flex", alignItems: "center", justifyContent: "center", color: accent }}>{icon}</div>
         }
       </div>
-      <div style={{ fontSize: 26, fontWeight: 700, color: C.t1, letterSpacing: "-0.5px", fontFamily: "'Syne', sans-serif", marginBottom: 6 }}>{value}</div>
+      <div style={{ fontSize: 26, fontWeight: 700, color: C.t1, letterSpacing: "-0.5px", fontFamily: "'Montserrat', sans-serif", marginBottom: 6 }}>{value}</div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         {sub && <div style={{ fontSize: 11, color: C.t3 }}>{sub}</div>}
         {sparkData && <Sparkline data={sparkData} color={accent} />}
@@ -321,7 +321,7 @@ function Modal({ title, onClose, children, wide }) {
         animation: "fadeIn 0.15s ease",
       }}>
         <div style={{ padding: "18px 24px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: C.white, zIndex: 1 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif" }}>{title}</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: C.t1, fontFamily: "'Montserrat', sans-serif" }}>{title}</span>
           <button onClick={onClose} style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, width: 30, height: 30, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.t3 }}>{Icon.x}</button>
         </div>
         <div style={{ padding: "20px 24px" }}>{children}</div>
@@ -597,6 +597,116 @@ function RecordPaymentModal({ properties, onClose }) {
   );
 }
 
+// ─── Edit Tenant Modal ────────────────────────────────────────────────────────
+function EditTenantModal({ lease, onClose }) {
+  const C = useC();
+  const inputSt = makeInputSt(C);
+  const { updateTenant, deleteTenant } = useAppData();
+  const [form, setForm] = useState({
+    tenantName:   lease.tenantName || '',
+    monthlyRent:  lease.monthlyRent || '',
+    endDate:      lease.endDate ? new Date(lease.endDate).toISOString().split('T')[0] : '',
+    status:       (lease.status || 'Active').toLowerCase(),
+    notes:        '',
+  });
+  const [busy, setBusy] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
+  const [err, setErr]   = useState('');
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const submit = async e => {
+    e.preventDefault();
+    if (!form.tenantName.trim()) { setErr('Tenant name is required.'); return; }
+    if (!Number(form.monthlyRent)) { setErr('Enter a valid monthly rent.'); return; }
+    setBusy(true); setErr('');
+    try {
+      await updateTenant(lease.id, form);
+      onClose();
+    } catch (ex) {
+      setErr(ex.message || 'Failed to update tenant.');
+    } finally { setBusy(false); }
+  };
+
+  const remove = async () => {
+    setBusy(true); setErr('');
+    try {
+      await deleteTenant(lease.id, lease.unitId);
+      onClose();
+    } catch (ex) {
+      setErr(ex.message || 'Failed to remove tenant.');
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Modal title={`Edit Tenant — ${lease.tenantName}`} onClose={onClose}>
+      <form onSubmit={submit}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Field label="Tenant Name">
+            <input style={inputSt} value={form.tenantName} onChange={set('tenantName')} required />
+          </Field>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <Field label="Monthly Rent">
+              <input type="number" style={inputSt} value={form.monthlyRent} onChange={set('monthlyRent')} required />
+            </Field>
+            <Field label="Lease End Date">
+              <input type="date" style={inputSt} value={form.endDate} onChange={set('endDate')} required />
+            </Field>
+          </div>
+          <Field label="Status">
+            <select style={inputSt} value={form.status} onChange={set('status')}>
+              <option value="active">Active</option>
+              <option value="ended">Ended</option>
+              <option value="expiring">Expiring</option>
+            </select>
+          </Field>
+          <Field label="Notes (optional)">
+            <input style={inputSt} value={form.notes} onChange={set('notes')} placeholder="Any additional notes…" />
+          </Field>
+
+          <div style={{ fontSize: 11, color: C.t3, marginTop: 4 }}>
+            Property and access code can't be changed. Remove the tenant if they're moving out and re-add for a new lease.
+          </div>
+
+          {err && (
+            <div style={{ background: C.redAlpha, border: `1px solid ${C.red}40`, borderRadius: 8, padding: '10px 12px', color: C.red, fontSize: 13 }}>{err}</div>
+          )}
+
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', marginTop: 6 }}>
+            {!confirmDel ? (
+              <button type="button" onClick={() => setConfirmDel(true)} disabled={busy}
+                style={{ padding: '10px 16px', borderRadius: 8, border: `1px solid ${C.red}40`, background: C.redAlpha, color: C.red, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                Remove Tenant
+              </button>
+            ) : (
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button type="button" onClick={() => setConfirmDel(false)} disabled={busy}
+                  style={{ padding: '10px 14px', borderRadius: 8, border: `1px solid ${C.border}`, background: C.white, color: C.t2, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Cancel
+                </button>
+                <button type="button" onClick={remove} disabled={busy}
+                  style={{ padding: '10px 14px', borderRadius: 8, border: 'none', background: C.red, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  {busy ? 'Removing…' : 'Confirm Remove'}
+                </button>
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button type="button" onClick={onClose} disabled={busy}
+                style={{ padding: '10px 16px', borderRadius: 8, border: `1px solid ${C.border}`, background: C.white, color: C.t2, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                Cancel
+              </button>
+              <button type="submit" disabled={busy}
+                style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: C.blue, color: '#fff', fontSize: 13, fontWeight: 700, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+                {busy ? 'Saving…' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 // ─── Add Lease Modal ──────────────────────────────────────────────────────────
 function AddLeaseModal({ property, onClose }) {
   const C = useC();
@@ -687,7 +797,7 @@ function AddLeaseModal({ property, onClose }) {
         </div>
         <div style={{ width: '100%', background: C.bg, border: `2px dashed ${C.blue}`, borderRadius: 12, padding: '20px', textAlign: 'center' }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: C.t3, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>Tenant Access Code</div>
-          <div style={{ fontSize: 30, fontWeight: 800, color: C.blue, letterSpacing: '6px', fontFamily: "'Syne', sans-serif" }}>{doneCode}</div>
+          <div style={{ fontSize: 30, fontWeight: 800, color: C.blue, letterSpacing: '6px', fontFamily: "'Montserrat', sans-serif" }}>{doneCode}</div>
         </div>
         <div style={{ width: '100%', background: C.amberAlpha, border: `1px solid ${C.amber}30`, borderRadius: 8, padding: '12px 14px', fontSize: 12, color: C.t2, lineHeight: 1.7 }}>
           <strong>Save this code now</strong> — it won't be shown again.<br />
@@ -901,14 +1011,14 @@ function Topbar({ tab, notifOpen, setNotifOpen, notifRef, openMaint, theme, togg
       {/* Left: page title */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         {!isMobile && <div style={{ color: C.t2, display: "flex" }}>{Icon.grid}</div>}
-        <span style={{ fontSize: isMobile ? 15 : 13, fontWeight: 700, color: C.t1, fontFamily: isMobile ? "'Syne', sans-serif" : "inherit" }}>{tab}</span>
+        <span style={{ fontSize: isMobile ? 15 : 13, fontWeight: 700, color: C.t1, fontFamily: isMobile ? "'Montserrat', sans-serif" : "inherit" }}>{tab}</span>
       </div>
 
       {/* Center: logo (desktop only) */}
       {!isMobile && (
         <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 10 }}>
           <AugmenticsLogoMark size={28} onDark={theme === 'dark'} />
-          <div style={{ fontSize: 14, fontWeight: 800, color: C.t1, letterSpacing: "1.2px", fontFamily: "'Syne', sans-serif", lineHeight: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: C.t1, letterSpacing: "1.2px", fontFamily: "'Montserrat', sans-serif", lineHeight: 1 }}>
             AUGMENTICS <span style={{ color: C.blue }}>AI</span>
           </div>
         </div>
@@ -1012,7 +1122,7 @@ function OverviewTab({ setTab, setSel, properties, payments, maintenance, revenu
       {/* Page header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: isMobile ? 14 : 22 }}>
         <div>
-          <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif" }}>Dashboard</div>
+          <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: C.t1, fontFamily: "'Montserrat', sans-serif" }}>Dashboard</div>
           {!isMobile && <div style={{ fontSize: 12, color: C.t3, marginTop: 3 }}>Overview of your property portfolio.</div>}
         </div>
         {!isMobile && (
@@ -1038,7 +1148,7 @@ function OverviewTab({ setTab, setSel, properties, payments, maintenance, revenu
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
             <div>
               <div style={{ fontSize: 11, fontWeight: 600, color: C.t3, textTransform: "uppercase", letterSpacing: "0.6px" }}>Revenue Overview</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif", marginTop: 4 }}>{fmtAED(totalRent)}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: C.t1, fontFamily: "'Montserrat', sans-serif", marginTop: 4 }}>{fmtAED(totalRent)}</div>
             </div>
             <span style={{ fontSize: 11, background: C.blueAlpha, color: C.blueLt, border: `1px solid ${C.blue}30`, borderRadius: 6, padding: "4px 10px", fontWeight: 600 }}>This Month</span>
           </div>
@@ -1093,7 +1203,7 @@ function OverviewTab({ setTab, setSel, properties, payments, maintenance, revenu
               { pct: overdue  / (collected + pending + overdue || 1) * 100, color: C.red },
             ]} size={100} thickness={18} />
             <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", textAlign: "center" }}>
-              <div style={{ fontSize: 16, fontWeight: 800, color: C.t1, fontFamily: "'Syne', sans-serif", lineHeight: 1 }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: C.t1, fontFamily: "'Montserrat', sans-serif", lineHeight: 1 }}>
                 {collected + pending + overdue > 0 ? Math.round(collected / (collected + pending + overdue) * 100) : 0}%
               </div>
               <div style={{ fontSize: 9, color: C.t3, marginTop: 2 }}>Collected</div>
@@ -1328,7 +1438,7 @@ function PropertiesTab({ sel, setSel, properties, maintenance, onAddProperty, on
                   <span style={{ fontSize: 10, background: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)", borderRadius: 4, padding: "2px 8px", fontWeight: 600, letterSpacing: "0.5px" }}>{sel.code}</span>
                   <span style={{ fontSize: 10, background: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)", borderRadius: 4, padding: "2px 8px", fontWeight: 600 }}>{sel.type}</span>
                 </div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", fontFamily: "'Syne', sans-serif" }}>{sel.name}</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", fontFamily: "'Montserrat', sans-serif" }}>{sel.name}</div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 5, display: "flex", alignItems: "center", gap: 5 }}>{Icon.mapPin} {sel.address || sel.city}</div>
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
@@ -1353,7 +1463,7 @@ function PropertiesTab({ sel, setSel, properties, maintenance, onAddProperty, on
               ].map(([l, v, warn], idx) => (
                 <div key={l} style={{ padding: "16px 20px", borderRight: idx < 3 ? `1px solid ${C.border}` : "none", borderTop: `1px solid ${C.border}` }}>
                   <div style={{ fontSize: 10, color: C.t3, textTransform: "uppercase", letterSpacing: "0.7px", marginBottom: 6, fontWeight: 600 }}>{l}</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: warn ? C.red : C.t1, fontFamily: "'Syne', sans-serif" }}>{v}</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: warn ? C.red : C.t1, fontFamily: "'Montserrat', sans-serif" }}>{v}</div>
                 </div>
               ))}
             </div>
@@ -1522,6 +1632,48 @@ function PaymentsTab({ payments, properties, onAddPayment }) {
 // ════════════════════════════════════════════════════════════════════════════════
 // MAINTENANCE TAB
 // ════════════════════════════════════════════════════════════════════════════════
+function StatusDropdown({ m }) {
+  const C = useC();
+  const { updateMaintenanceStatus } = useAppData();
+  const [busy, setBusy] = useState(false);
+  const dbKeyMap = { Open: 'open', 'In Progress': 'in_progress', Resolved: 'resolved' };
+  const colorMap = {
+    Open:          { bg: C.redAlpha,    color: C.red,    border: `${C.red}40`    },
+    'In Progress': { bg: C.blueAlpha,   color: C.blue,   border: `${C.blue}40`   },
+    Resolved:      { bg: C.greenAlpha,  color: C.greenDk || C.green, border: `${C.green}40` },
+  };
+  const c = colorMap[m.status] || colorMap.Open;
+  const onChange = async (e) => {
+    const newDbKey = dbKeyMap[e.target.value];
+    if (!newDbKey) return;
+    setBusy(true);
+    try { await updateMaintenanceStatus(m.id, newDbKey); }
+    catch (err) { alert(err.message || 'Failed to update status'); }
+    finally { setBusy(false); }
+  };
+  return (
+    <select value={m.status} onChange={onChange} disabled={busy}
+      style={{
+        appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
+        background: `${c.bg} url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(c.color)}' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right 8px center`,
+        color: c.color,
+        border: `1px solid ${c.border}`,
+        borderRadius: 20,
+        padding: '4px 22px 4px 10px',
+        fontSize: 11,
+        fontWeight: 600,
+        cursor: busy ? 'wait' : 'pointer',
+        fontFamily: 'inherit',
+        outline: 'none',
+        opacity: busy ? 0.6 : 1,
+      }}>
+      <option value="Open">Open</option>
+      <option value="In Progress">In Progress</option>
+      <option value="Resolved">Resolved</option>
+    </select>
+  );
+}
+
 function MaintenanceTab({ maintenance }) {
   const C = useC();
   const { isMobile } = useBreakpoint();
@@ -1572,9 +1724,9 @@ function MaintenanceTab({ maintenance }) {
             </div>
           : filtered.map((m, i) => isMobile ? (
               <div key={m.id} style={{ padding: "14px 16px", borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : "none", borderLeft: `3px solid ${priorityAccent[m.priority] || C.border}` }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 5 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: m.status === "Resolved" ? C.t3 : C.t1, flex: 1, marginRight: 8 }}>{m.issue}</div>
-                  <Badge s={m.status} />
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 5, gap: 8 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: m.status === "Resolved" ? C.t3 : C.t1, flex: 1 }}>{m.issue}</div>
+                  <StatusDropdown m={m} />
                 </div>
                 <div style={{ fontSize: 12, color: C.t2, marginBottom: 6 }}>{m.prop}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1594,7 +1746,7 @@ function MaintenanceTab({ maintenance }) {
                 <span style={{ fontSize: 12, color: m.assignee === "Unassigned" ? C.red : C.t2, fontWeight: m.assignee === "Unassigned" ? 600 : 400 }}>{m.assignee}</span>
                 <span style={{ fontSize: 12, color: C.t2 }}>{m.date}</span>
                 <Badge s={m.priority} />
-                <Badge s={m.status} />
+                <StatusDropdown m={m} />
               </div>
             ))
         }
@@ -1855,6 +2007,7 @@ function TenantCard({ lease, onAddLease }) {
   const C = useC();
   const [copied, setCopied] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
   const storageKey = `docs_${lease.id}`;
   const [checkedDocs, setCheckedDocs] = useState(() => {
     try { return JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch { return []; }
@@ -1882,7 +2035,7 @@ function TenantCard({ lease, onAddLease }) {
       {/* Top row */}
       <div style={{ padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div style={{ display: "flex", gap: 13, alignItems: "flex-start" }}>
-          <div style={{ width: 46, height: 46, borderRadius: 12, background: C.bluePl, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 700, color: C.blue, flexShrink: 0, fontFamily: "'Syne', sans-serif" }}>
+          <div style={{ width: 46, height: 46, borderRadius: 12, background: C.bluePl, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 700, color: C.blue, flexShrink: 0, fontFamily: "'Montserrat', sans-serif" }}>
             {initials}
           </div>
           <div>
@@ -1890,8 +2043,18 @@ function TenantCard({ lease, onAddLease }) {
             <div style={{ fontSize: 12, color: C.t3 }}>{lease.propertyName} · Unit {lease.unitNumber}</div>
           </div>
         </div>
-        <Badge s={lease.status} />
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Badge s={lease.status} />
+          <button onClick={() => setEditing(true)} title="Edit tenant"
+            style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 7, border: `1px solid ${C.border}`, background: C.white, color: C.t2, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = C.blue; e.currentTarget.style.color = C.blue; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.t2; }}>
+            {Icon.edit || (<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>)}
+            Edit
+          </button>
+        </div>
       </div>
+      {editing && <EditTenantModal lease={lease} onClose={() => setEditing(false)} />}
 
       {/* Details */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
@@ -1913,7 +2076,7 @@ function TenantCard({ lease, onAddLease }) {
           <div style={{ fontSize: 10, fontWeight: 600, color: C.t3, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 4 }}>
             Tenant Access Code — share this to let them log in
           </div>
-          <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: "5px", color: lease.accessCode ? C.blue : C.t4, fontFamily: "'Syne', monospace" }}>
+          <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: "5px", color: lease.accessCode ? C.blue : C.t4, fontFamily: "'Montserrat', monospace" }}>
             {lease.accessCode || "—"}
           </div>
         </div>
@@ -2001,7 +2164,7 @@ function TenantsTab({ tenants, properties, onAddTenant }) {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: C.t1, fontFamily: "'Syne', sans-serif" }}>Tenants</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: C.t1, fontFamily: "'Montserrat', sans-serif" }}>Tenants</div>
           <div style={{ fontSize: 13, color: C.t3, marginTop: 3 }}>
             {tenants.length} tenant{tenants.length !== 1 ? "s" : ""} · manage access codes and documents
           </div>

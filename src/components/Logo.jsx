@@ -40,7 +40,7 @@ export function AugmenticsLogoBrand({ size = 40, onDark = true }) {
       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
         <div style={{
           fontSize: Math.round(size * 0.4),
-          fontFamily: '"Inter Tight", Inter, sans-serif',
+          fontFamily: '"Montserrat", sans-serif',
           fontWeight: 700,
           letterSpacing: '0.02em',
           color: textColor,

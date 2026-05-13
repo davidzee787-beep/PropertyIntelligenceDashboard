@@ -51,7 +51,7 @@ export default function TenantLoginPage() {
         {/* Logo */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 40 }}>
           <AugmenticsLogoMark size={52} onDark={true} />
-          <div style={{ marginTop: 16, fontSize: 16, fontWeight: 800, color: '#F1F5F9', letterSpacing: '1.4px', fontFamily: "'Syne', sans-serif", lineHeight: 1 }}>
+          <div style={{ marginTop: 16, fontSize: 16, fontWeight: 800, color: '#F1F5F9', letterSpacing: '1.4px', fontFamily: "'Montserrat', sans-serif", lineHeight: 1 }}>
             AUGMENTICS <span style={{ color: C.blueLt }}>AI</span>
           </div>
           <div style={{ fontSize: 10, color: '#475569', letterSpacing: '1.6px', textTransform: 'uppercase', marginTop: 5, fontWeight: 500 }}>
@@ -62,7 +62,7 @@ export default function TenantLoginPage() {
         {/* Card */}
         <div style={{ background: '#0F1E3A', border: '1px solid #1E3A6E', borderRadius: 16, padding: '32px 32px 28px', boxShadow: '0 24px 64px rgba(0,0,0,0.5)' }}>
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#F1F5F9', fontFamily: "'Syne', sans-serif", marginBottom: 6 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#F1F5F9', fontFamily: "'Montserrat', sans-serif", marginBottom: 6 }}>
               Tenant Access
             </div>
             <div style={{ fontSize: 13, color: '#64748B', lineHeight: 1.6 }}>
@@ -95,7 +95,7 @@ export default function TenantLoginPage() {
                     fontWeight: 700,
                     letterSpacing: '6px',
                     textAlign: 'center',
-                    fontFamily: "'Syne', monospace",
+                    fontFamily: "'Montserrat', monospace",
                     outline: 'none',
                     transition: 'border-color 0.15s',
                   }}
